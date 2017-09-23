@@ -1,0 +1,15 @@
+{
+  "name": "poi",
+  "version": "1.0.0",
+  "description": "POI is a mobile application for creating and sharing points of interest.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Michael Blake",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "express": "^4.15.4"
+  }
+}
