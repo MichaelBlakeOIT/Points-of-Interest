@@ -12,7 +12,7 @@ passport.use(
     }, 
     function(jwtPayload, done) {
         //console.log(jwtPayload);
-        config.pool.query("SELECT * FROM users WHERE username = '" + jwtPayload.username + "';", function(err, rows) {
+        config.pool.query("SELECT * FROM users WHERE username = " + config.pool.escape(jwtPayload.username) + ";", function(err, rows) {
             if (err)
                 return done(err);
             if (!rows.length)

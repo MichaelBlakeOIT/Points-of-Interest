@@ -1,13 +1,14 @@
 var express = require('express');
-var session = require('express-session');
 var bodyParser = require('body-parser')
 var router = express.Router();
 var app = express();
 var sessionController = require('./routes/session');
+var morgan = require('morgan');
 
-var port = process.env.PORT || 8080;
+var port = process.env.PORT || 80;
 var passport = require('passport');
 
+app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({ extended: true }) ); // get information from html forms
 //app.use(session({ secret: "cats" }));
 app.use(passport.initialize());
