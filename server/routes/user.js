@@ -14,15 +14,17 @@ router.post('/',
     ),
     function (req, res) {
         if (!req.form.isValid) {
-            res.send(req.form.errors).end();
+            res.json({ success: false, message: req.form.errors });
+            console.log(req.form.errors);
         }
         config.pool.query("SELECT * FROM Users WHERE Username = " + config.pool.escape(req.body.username) + ";", function (err, rows) {
+            console.log("no errors");
             if (err) {
                 console.log(err);
                 res.end();
             }
             if (rows.length)
-                res.send('That username is already taken.');
+                res.json({ success: false, message: 'Username taken' });
 
             config.pool.query("SELECT * FROM Users WHERE Email = " + config.pool.escape(req.body.email) + ";", function (err, rows) {
                 if (err) {
@@ -30,7 +32,7 @@ router.post('/',
                     res.end();
                 }
                 if (rows.length)
-                    res.send('That email is already taken.');
+                res.json({ success: false, message: 'Email taken' });
 
                 var hash = bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(8), null);
 
@@ -43,7 +45,7 @@ router.post('/',
                         res.end();
                     }
                     else
-                        res.send('created user');
+                        res.json({ success: true, message: 'Account created' });
                 });
             });
         });
