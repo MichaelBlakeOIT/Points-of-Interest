@@ -28,15 +28,6 @@ import java.util.Map;
  * A login screen that offers login via email/password.
  */
 public class LoginActivity extends AppCompatActivity {
-
-    /**
-     * Id to identity READ_CONTACTS permission request.
-     */
-    private static final int REQUEST_READ_CONTACTS = 0;
-
-    /**
-     * Keep track of the login task to ensure we can cancel it if requested.
-     */
     private UserLoginTask mAuthTask = null;
 
     // UI references.
@@ -102,7 +93,7 @@ public class LoginActivity extends AppCompatActivity {
 
         @Override
         public void onClick(View v) {
-            Intent RegisterActivityIntent = new Intent(LoginActivity.this, activity_signup.class);
+            Intent RegisterActivityIntent = new Intent(LoginActivity.this, SignupActivity.class);
             LoginActivity.this.startActivity(RegisterActivityIntent);
         }
     };
@@ -175,12 +166,12 @@ public class LoginActivity extends AppCompatActivity {
      */
     public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
 
-        private final String mEmail;
+        private final String mUsername;
         private final String mPassword;
         private Context mContext;
 
-        UserLoginTask(String email, String password) {
-            mEmail = email;
+        UserLoginTask(String username, String password) {
+            mUsername = username;
             mPassword = password;
         }
 
@@ -224,7 +215,7 @@ public class LoginActivity extends AppCompatActivity {
                 protected Map<String, String> getParams()
                 {
                     Map<String, String>  params = new HashMap<String, String>();
-                    params.put("username", mEmail);
+                    params.put("username", mUsername);
                     params.put("password", mPassword);
 
                     return params;

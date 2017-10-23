@@ -63,17 +63,17 @@
                 android:layout_height="wrap_content">
 
                 <EditText
-                    android:id="@+id/passwordLoginField"
+                    android:id="@+id/PasswordSignupField"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textCursorDrawable="@null"
                     android:backgroundTint="@android:color/holo_blue_bright"
                     android:hint="@string/prompt_password"
                     android:imeActionId="@+id/login"
                     android:imeActionLabel="@string/action_sign_in_short"
                     android:imeOptions="actionUnspecified"
                     android:inputType="textPassword"
-                    android:maxLines="1" />
+                    android:maxLines="1"
+                    android:textCursorDrawable="@null" />
 
             </android.support.design.widget.TextInputLayout>
 
@@ -120,6 +120,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:background="@android:color/holo_blue_dark"
+                android:elevation="22dp"
                 android:text="Register"
                 android:textStyle="bold" />
 
