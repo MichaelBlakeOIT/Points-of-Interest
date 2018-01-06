@@ -1,16 +1,17 @@
 package poi.michael.pointsofinterest;
 
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
 import android.view.View;
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -22,56 +23,56 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
-public class SignupActivity extends AppCompatActivity {
+public class addPoiActivity extends AppCompatActivity {
+
+    private double mLatitude = 0;
+    private double mLongitude = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_signup);
+        setContentView(R.layout.activity_add_poi);
 
-        Button mSignupButton = (Button) findViewById(R.id.sign_up_button);
-        mSignupButton.setOnClickListener(mSignupButtonListener);
+        Intent intentExtras = getIntent();
+        mLatitude = intentExtras.getDoubleExtra("latitude", 0);
+        mLongitude = intentExtras.getDoubleExtra("longitude", 0);
+
+        Toast.makeText(getApplicationContext(), Double.toString(mLongitude), Toast.LENGTH_LONG).show();
+
+        final Button addPoiButton = (Button) findViewById(R.id.AddPoiButton);
+        addPoiButton.setOnClickListener(mAddPoiListener);
     }
 
-    private View.OnClickListener mSignupButtonListener = new View.OnClickListener() {
+    private View.OnClickListener mAddPoiListener = new View.OnClickListener() {
         public void onClick(View v) {
-            AutoCompleteTextView username = (AutoCompleteTextView) findViewById(R.id.UsernameSignupField);
-            EditText password = (EditText) findViewById(R.id.PasswordSignupField);
-            EditText first = (EditText) findViewById(R.id.FirstNameSignupField);
-            EditText last = (EditText) findViewById(R.id.LastNameSignupField);
-            EditText email = (EditText) findViewById(R.id.EmailSignupField);
+            EditText PoiName = (EditText) findViewById(R.id.PoiName);
+            EditText PoiDescription = (EditText) findViewById(R.id.PoiDescription);
 
-            new UserSignupTask(email.getText().toString(), password.getText().toString(), username.getText().toString(),
-                               first.getText().toString(), last.getText().toString()).execute();
-            //mSignInButton.setText("TEST");
-            // Instantiate the RequestQueue.
-
+            new AddPoiTask(mLatitude, mLongitude, PoiName.getText().toString(), PoiDescription.getText().toString()).execute();
         }
     };
 
-    public class UserSignupTask extends AsyncTask<Void, Void, Boolean> {
+    private class AddPoiTask extends AsyncTask<Void, Void, Boolean> {
 
-        private final String mEmail;
-        private final String mPassword;
-        private final String mFirst;
-        private final String mLast;
-        private final String mUsername;
+        private final double mLat;
+        private final double mLong;
+        private final String mName;
+        private final String mDescription;
+
         private Context mContext;
 
-        UserSignupTask(String email, String password, String username, String first, String last) {
-            mEmail = email;
-            mPassword = password;
-            mFirst = first;
-            mLast = last;
-            mUsername = username;
+        AddPoiTask(double lat, double _long, String name, String description) {
+            mLat = lat;
+            mLong = _long;
+            mName = name;
+            mDescription = description;
         }
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            String url =  getResources().getString(R.string.base_url) + "/user";
+            // TODO: attempt authentication against a network service.
+            String url = getResources().getString(R.string.base_url) + "/poi";
             mContext = getApplicationContext();
-
-            //Button mSignInButton = (Button) findViewById(R.id.sign_in_button);
 
             StringRequest postRequest = new StringRequest(Request.Method.POST, url,
                     new Response.Listener<String>() {
@@ -83,7 +84,7 @@ public class SignupActivity extends AppCompatActivity {
                                 if (JSONResponse.getBoolean("success")) {
                                     Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_SHORT).show();
                                 } else {
-                                    Toast.makeText(getApplicationContext(), "Field error", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(getApplicationContext(), "Failure", Toast.LENGTH_SHORT).show();
                                 }
                             } catch (JSONException e) {
                                 e.printStackTrace();
@@ -102,11 +103,21 @@ public class SignupActivity extends AppCompatActivity {
                 @Override
                 protected Map<String, String> getParams() {
                     Map<String, String> params = new HashMap<String, String>();
-                    params.put("username", mUsername);
-                    params.put("password", mPassword);
-                    params.put("firstname", mFirst);
-                    params.put("lastname", mLast);
-                    params.put("email", mEmail);
+                    params.put("lat", Double.toString(mLat));
+                    params.put("long", Double.toString(mLong));
+                    params.put("title", mName);
+                    params.put("description", mDescription);
+                    return params;
+                }
+
+                @Override
+                public Map<String, String> getHeaders() throws AuthFailureError {
+                    SharedPreferences sharedPref = getSharedPreferences(getString(R.string.user_token), Context.MODE_PRIVATE);
+
+
+                    Map<String, String> params = new HashMap<String, String>();
+                    params.put("Authorization", "Bearer " + sharedPref.getString("token", ""));
+                    params.put("Accept-Language", "fr");
 
                     return params;
                 }
@@ -117,7 +128,7 @@ public class SignupActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(final Boolean success) {
-
+            finish();
         }
 
         @Override
@@ -125,4 +136,5 @@ public class SignupActivity extends AppCompatActivity {
 
         }
     }
+
 }

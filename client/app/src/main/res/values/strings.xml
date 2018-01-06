@@ -15,4 +15,9 @@
     <string name="error_field_required">This field is required</string>
     <string name="prompt_firstName">First Name</string>
     <string name="prompt_lastName">Last Name</string>
+    <string name="title_activity_map">Map</string>
+    <string name="user_token">userToken</string>
+    <string name="title_activity_test">test</string>
+    <string name="base_url">https://points-of-interest.herokuapp.com</string>
+    <string name="title_activity_testmap">Map</string>
 </resources>

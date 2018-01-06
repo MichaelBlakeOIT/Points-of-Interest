@@ -2,6 +2,7 @@ package poi.michael.pointsofinterest;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -41,27 +42,14 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         //this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_login);
-        // Set up the login form.
-        //mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
-        /*populateAutoComplete();
-
-        mPasswordView = (EditText) findViewById(R.id.password);
-        mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
-                if (id == R.id.login || id == EditorInfo.IME_NULL) {
-                    attemptLogin();
-                    return true;
-                }
-                return false;
-            }
-        });*/
 
         Button mSignInButton = (Button) findViewById(R.id.sign_in_button);
         TextView RegisterTextView = (TextView) findViewById(R.id.registerSelect);
 
         mSignInButton.setOnClickListener(mSignInButtonListener);
         RegisterTextView.setOnClickListener(mRegisterSelectListener);
+
+        checkToken();
 
         /*mEmailSignInButton.setOnClickListener(new OnClickListener() {
             @Override
@@ -164,7 +152,7 @@ public class LoginActivity extends AppCompatActivity {
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
      */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
+    private class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
 
         private final String mUsername;
         private final String mPassword;
@@ -178,7 +166,7 @@ public class LoginActivity extends AppCompatActivity {
         @Override
         protected Boolean doInBackground(Void... params) {
             // TODO: attempt authentication against a network service.
-            String url = "http://192.168.1.14:80/session";
+            String url = getResources().getString(R.string.base_url) + "/session";
             mContext = getApplicationContext();
 
             //Button mSignInButton = (Button) findViewById(R.id.sign_in_button);
@@ -191,8 +179,19 @@ public class LoginActivity extends AppCompatActivity {
                             // response
                             try {
                                 JSONObject JSONResponse = new JSONObject(response);
-                                if (JSONResponse.getBoolean("success") == true) {
+                                if (JSONResponse.getBoolean("success")) {
+                                    SharedPreferences sharedPref = getSharedPreferences(getString(R.string.user_token), Context.MODE_PRIVATE);
+                                    SharedPreferences.Editor editor = sharedPref.edit();
+
+                                    editor.putString("token", JSONResponse.getString("token"));
+                                    editor.apply();
+
                                     Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_SHORT).show();
+
+                                    Intent MapActivityIntent = new Intent(LoginActivity.this, MapActivity.class);
+                                    LoginActivity.this.startActivity(MapActivityIntent);
+
+                                    LoginActivity.this.finish();
                                 } else {
                                     Toast.makeText(getApplicationContext(), "Incorrect login", Toast.LENGTH_SHORT).show();
                                 }
@@ -243,6 +242,17 @@ public class LoginActivity extends AppCompatActivity {
         protected void onCancelled() {
             mAuthTask = null;
             //showProgress(false);
+        }
+    }
+
+    private void checkToken()
+    {
+        SharedPreferences sharedPrefs = getSharedPreferences(getString(R.string.user_token), MODE_PRIVATE);
+        if (sharedPrefs.contains("token"))
+        {
+            Intent MapActivityIntent = new Intent(LoginActivity.this, MapActivity.class);
+            LoginActivity.this.startActivity(MapActivityIntent);
+            LoginActivity.this.finish();
         }
     }
 }

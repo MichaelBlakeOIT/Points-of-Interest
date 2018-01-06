@@ -12,12 +12,12 @@ passport.use(
     }, 
     function(jwtPayload, done) {
         //console.log(jwtPayload);
-        config.pool.query("SELECT * FROM users WHERE username = " + config.pool.escape(jwtPayload.username) + ";", function(err, rows) {
+        config.pool.query("SELECT username, user_id FROM users WHERE username = " + config.pool.escape(jwtPayload.username) + ";", function(err, rows) {
             if (err)
                 return done(err);
             if (!rows.length)
                 return done(null, false);
-            return done(null, true);
+            return done(null, rows[0]);
         });
 }));
 

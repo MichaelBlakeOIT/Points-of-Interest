@@ -7,6 +7,6 @@ module.exports.checkAuthentication = function(req,res,next)
     }
     else
     {
-        res.send("auth failed");
+        res.json({ success: false, message: "auth failed" });
     }
 }
