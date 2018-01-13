@@ -16,6 +16,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -84,7 +85,9 @@ public class SignupActivity extends AppCompatActivity {
                                 if (JSONResponse.getBoolean("success")) {
                                     Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_SHORT).show();
                                 } else {
-                                    Toast.makeText(getApplicationContext(), "Field error", Toast.LENGTH_SHORT).show();
+                                    JSONArray errorArray = JSONResponse.getJSONArray("message");
+                                    String errorText = errorArray.getString(0);
+                                    Toast.makeText(getApplicationContext(), errorText, Toast.LENGTH_SHORT).show();
                                 }
                             } catch (JSONException e) {
                                 e.printStackTrace();

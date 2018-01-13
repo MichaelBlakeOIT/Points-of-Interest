@@ -20,4 +20,5 @@
     <string name="title_activity_test">test</string>
     <string name="base_url">https://points-of-interest.herokuapp.com</string>
     <string name="title_activity_testmap">Map</string>
+    <string name="title_activity_testactivity">testactivity</string>
 </resources>

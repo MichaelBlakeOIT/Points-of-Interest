@@ -14,8 +14,14 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.support.v7.widget.ToolbarWidgetWrapper;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
@@ -37,7 +43,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MapActivity extends FragmentActivity implements OnMapReadyCallback {
+public class MapActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
     private LocationManager mLocationManager;
@@ -49,10 +55,14 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Retrieve the content view that renders the map.
         setContentView(R.layout.activity_map);
-        // Get the SupportMapFragment and request notification
-        // when the map is ready to be used.
+
+        //getSupportActionBar().setTitle("Your Activity Title"); // for set actionbar title
+       // getSupportActionBar().setDisplayHomeAsUpEnabled(true); // for add back arrow in action bar
+
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        setSupportActionBar(myToolbar);
+
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -76,6 +86,13 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         new loadPoints().execute();
 
         //mUserLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu, menu);
+        return true;
     }
 
     @Override
