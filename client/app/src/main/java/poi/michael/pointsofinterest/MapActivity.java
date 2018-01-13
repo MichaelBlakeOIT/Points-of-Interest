@@ -96,6 +96,18 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     }
 
     @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case R.id.action_logout:
+                logout();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
         if (requestCode == CREATE_POI_REQUEST) {
@@ -315,6 +327,16 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         protected void onCancelled() {
 
         }
+    }
+
+    private void logout() {
+        SharedPreferences preferences = getSharedPreferences(getString(R.string.user_token), 0);
+        preferences.edit().remove("token").commit();
+
+        Intent LoginActivityIntent = new Intent(MapActivity.this, LoginActivity.class);
+        MapActivity.this.startActivity(LoginActivityIntent);
+
+        MapActivity.this.finish();
     }
 
 }
