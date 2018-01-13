@@ -1,11 +1,15 @@
 package poi.michael.pointsofinterest;
 
 import android.Manifest;
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
@@ -13,6 +17,11 @@ import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -20,13 +29,22 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MapActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
     private LocationManager mLocationManager;
     private LatLng mUserLocation;
+    public static final int CREATE_POI_SUCCESS_CODE = 0;
+    public static final int CREATE_POI_FAILURE_CODE = 1;
+    public static final int CREATE_POI_REQUEST = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,13 +67,34 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                 Intent AddPoiActivityIntent = new Intent(MapActivity.this, addPoiActivity.class);
                 AddPoiActivityIntent.putExtra("latitude", location.getLatitude());
                 AddPoiActivityIntent.putExtra("longitude", location.getLongitude());
-                startActivity(AddPoiActivityIntent);
+                startActivityForResult(AddPoiActivityIntent, CREATE_POI_REQUEST);
+                //mMap.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(), location.getLongitude())).title("123"));
+                //startActivity(AddPoiActivityIntent);
             }
         });
+
+        new loadPoints().execute();
 
         //mUserLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        if (requestCode == CREATE_POI_REQUEST) {
+
+            if (resultCode == Activity.RESULT_OK) {
+                double latitude = data.getDoubleExtra("latitude", 0);
+                double longitude = data.getDoubleExtra("longitude", 0);
+                String name = data.getStringExtra("name");
+                String description = data.getStringExtra("description");
+                // do something with the result
+                mMap.addMarker(new MarkerOptions().position(new LatLng(latitude, longitude)).title(name));
+            } else if (resultCode == Activity.RESULT_CANCELED) {
+                // some stuff that will happen if there's no result
+            }
+        }
+    }
 
     private void StartLocationTracking()
     {
@@ -159,7 +198,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                     .build();
 
             mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), 10000, null);*/
-            googleMap.addMarker(new MarkerOptions().position(coordinate).title("test123"));
+
             googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(coordinate, 15));
             //mapView.onResume();
         }
@@ -183,6 +222,82 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
             }
         }
         return bestLocation;
+    }
+
+    public void addMarker(LatLng coordinate, String title) {
+        mMap.addMarker(new MarkerOptions().position(coordinate).title(title));
+    }
+
+    private class loadPoints extends AsyncTask<Void, Void, Boolean> {
+        private Context mContext;
+
+        loadPoints() {
+
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            // TODO: attempt authentication against a network service.
+            String url = getResources().getString(R.string.base_url) + "/poi";
+            mContext = getApplicationContext();
+
+            StringRequest postRequest = new StringRequest(Request.Method.GET, url,
+                    new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+                            // response
+                            try {
+                                JSONObject JSONResponse = new JSONObject(response);
+
+                                JSONArray POIs = JSONResponse.getJSONArray("data");
+
+                                for(int i = 0; i < POIs.length(); i++) {
+                                    JSONObject POI = POIs.getJSONObject(i);
+                                    Double lat = POI.getDouble("lat");
+                                    Double long_ = POI.getDouble("long");
+                                    String title = POI.getString("title");
+
+                                    mMap.addMarker(new MarkerOptions().position(new LatLng(lat, long_)).title(title));
+                                }
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                            //Log.d("Response", response);
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            // error
+                            //Log.d("Error.Response", error.toString());
+                        }
+                    }
+            ) {
+
+                @Override
+                public Map<String, String> getHeaders() throws AuthFailureError {
+                    SharedPreferences sharedPref = getSharedPreferences(getString(R.string.user_token), Context.MODE_PRIVATE);
+
+
+                    Map<String, String> params = new HashMap<String, String>();
+                    params.put("Authorization", "Bearer " + sharedPref.getString("token", ""));
+                    params.put("Accept-Language", "fr");
+
+                    return params;
+                }
+            };
+            volleySingleton.getInstance(mContext).getRequestQueue().add(postRequest);
+            return true;
+        }
+
+        @Override
+        protected void onPostExecute(final Boolean success) {
+        }
+
+        @Override
+        protected void onCancelled() {
+
+        }
     }
 
 }

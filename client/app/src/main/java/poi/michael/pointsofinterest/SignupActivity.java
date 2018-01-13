@@ -70,6 +70,7 @@ public class SignupActivity extends AppCompatActivity {
         protected Boolean doInBackground(Void... params) {
             String url =  getResources().getString(R.string.base_url) + "/user";
             mContext = getApplicationContext();
+            Boolean success = true;
 
             //Button mSignInButton = (Button) findViewById(R.id.sign_in_button);
 
@@ -117,7 +118,7 @@ public class SignupActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(final Boolean success) {
-
+            //finish();
         }
 
         @Override

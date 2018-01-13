@@ -1,5 +1,6 @@
 package poi.michael.pointsofinterest;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -16,6 +17,7 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
+import com.google.android.gms.maps.model.LatLng;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -36,8 +38,6 @@ public class addPoiActivity extends AppCompatActivity {
         Intent intentExtras = getIntent();
         mLatitude = intentExtras.getDoubleExtra("latitude", 0);
         mLongitude = intentExtras.getDoubleExtra("longitude", 0);
-
-        Toast.makeText(getApplicationContext(), Double.toString(mLongitude), Toast.LENGTH_LONG).show();
 
         final Button addPoiButton = (Button) findViewById(R.id.AddPoiButton);
         addPoiButton.setOnClickListener(mAddPoiListener);
@@ -128,6 +128,14 @@ public class addPoiActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(final Boolean success) {
+            MapActivity addPoint = new MapActivity();
+            Intent sendPointInfo = new Intent();
+            sendPointInfo.putExtra("latitude", mLat);
+            sendPointInfo.putExtra("longitude", mLong);
+            sendPointInfo.putExtra("name", mName);
+            sendPointInfo.putExtra("description", mDescription);
+            setResult(Activity.RESULT_OK, sendPointInfo);
+            //addPoint.addMarker(new LatLng(mLat, mLong), mName);
             finish();
         }
 

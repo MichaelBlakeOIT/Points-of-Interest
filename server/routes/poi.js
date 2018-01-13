@@ -19,20 +19,31 @@ router.post('/', requireAuth,
         var insert = "INSERT INTO point_of_interests (coordinates, user_id, title, description) VALUES " +
                      "(ST_GeomFromText('POINT(" + req.body.lat + " " + req.body.long + ")'), " + req.user.user_id +
                      ", " + config.pool.escape(req.body.title);
-        if (req.body.description != '')
-        {
+        if (req.body.description != '') {
             insert +=  ", " + config.pool.escape(req.body.description);
         }
         insert += ");";
 
         config.pool.query(insert, function(err, rows) {
-            if (err)
-            {
+            if (err) {
                 console.log(err);
                 return res.json({ success: false, message: "Unknown error" });
             }
             res.json({ success: true, message: "successfully added point" });
         });
+});
+
+router.get('/', requireAuth, function(req, res) {
+    var getPOIs = "SELECT user_id, pio_id, ST_X(coordinates) AS \"lat\", ST_Y(coordinates) AS \"long\", title, description FROM point_of_interests;";
+
+    config.pool.query(getPOIs, function(err, rows) {
+        if(err) {
+            console.log(err);
+            return res.json({ success: false, message: "Unknown error" });
+        }
+        res.json({ success: true, data: rows });
+    });
+
 });
 
 module.exports = router;

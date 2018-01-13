@@ -22,22 +22,27 @@ router.post('/',
             if (err) {
                 console.log(err);
                 res.end();
+                return;
             }
-            if (rows.length)
+            if (rows.length) {
                 res.json({ success: false, message: 'Username taken' });
+                return;
+            }
 
             config.pool.query("SELECT * FROM Users WHERE Email = " + config.pool.escape(req.body.email) + ";", function (err, rows) {
                 if (err) {
                     console.log(err);
                     res.end();
                 }
-                if (rows.length)
-                res.json({ success: false, message: 'Email taken' });
+                if (rows.length) {
+                    res.json({ success: false, message: 'Email taken' });
+                    return;
+                }
 
                 var hash = bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(8), null);
 
                 var insertQuery = "INSERT INTO users ( username, email, password, first_name, last_name ) \
-                                values (" + config.pool.escape(req.body.username) + "," + config.pool.escape(req.body.email) + ",'" + hash + "'," + config.pool.escape(req.body.firstname) + "," + config.pool.escape(req.body.lastname) + ");";
+                                    values (" + config.pool.escape(req.body.username) + "," + config.pool.escape(req.body.email) + ",'" + hash + "'," + config.pool.escape(req.body.firstname) + "," + config.pool.escape(req.body.lastname) + ");";
 
                 config.pool.query(insertQuery, function (err, rows) {
                     if (err) {
