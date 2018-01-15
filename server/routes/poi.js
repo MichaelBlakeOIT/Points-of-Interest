@@ -46,4 +46,21 @@ router.get('/', requireAuth, function(req, res) {
 
 });
 
+router.get('/:id', requireAuth, 
+    form(
+        field("req.params.id").isNumeric()
+    ),
+    function(req, res) {
+        var getPOI = "SELECT user_id, pio_id, ST_X(coordinates) AS \"lat\", ST_Y(coordinates) AS \"long\", title, description FROM point_of_interests WHERE pio_id = " + req.params.id;
+
+        config.pool.query(getPOI, function(err, rows) {
+            if(err) {
+                console.log(err);
+                return res.json({ success: false, message: "Unknown error" });
+            }
+            res.json({ success: true, data: rows[0] });
+        });
+
+});
+
 module.exports = router;
