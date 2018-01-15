@@ -102,6 +102,9 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             case R.id.action_logout:
                 logout();
                 return true;
+            case R.id.action_profile:
+                viewProfile();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -337,6 +340,11 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         MapActivity.this.startActivity(LoginActivityIntent);
 
         MapActivity.this.finish();
+    }
+
+    private void viewProfile() {
+        Intent ProfileActivityIntent = new Intent(MapActivity.this, ProfileActivity.class);
+        MapActivity.this.startActivity(ProfileActivityIntent);
     }
 
 }
