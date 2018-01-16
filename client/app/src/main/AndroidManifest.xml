@@ -46,7 +46,8 @@
             android:label="@string/title_activity_map" />
         <activity android:name=".addPoiActivity" />
         <activity android:name=".ProfileActivity" />
-        <activity android:name=".POIActivity"></activity>
+        <activity android:name=".POIActivity" />
+        <activity android:name=".SettingsActivity"></activity>
     </application>
 
 </manifest>
