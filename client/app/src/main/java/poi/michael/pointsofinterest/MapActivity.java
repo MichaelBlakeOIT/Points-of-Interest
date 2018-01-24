@@ -313,10 +313,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 public Map<String, String> getHeaders() throws AuthFailureError {
                     SharedPreferences sharedPref = getSharedPreferences(getString(R.string.user_token), Context.MODE_PRIVATE);
 
-
                     Map<String, String> params = new HashMap<String, String>();
                     params.put("Authorization", "Bearer " + sharedPref.getString("token", ""));
-                    params.put("Accept-Language", "fr");
 
                     return params;
                 }
