@@ -32,7 +32,9 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.json.JSONArray;
@@ -48,8 +50,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private GoogleMap mMap;
     private LocationManager mLocationManager;
     private LatLng mUserLocation;
-    public static final int CREATE_POI_SUCCESS_CODE = 0;
-    public static final int CREATE_POI_FAILURE_CODE = 1;
     public static final int CREATE_POI_REQUEST = 2;
 
     @Override
@@ -259,16 +259,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         return bestLocation;
     }
 
-    public void addMarker(LatLng coordinate, String title) {
-        mMap.addMarker(new MarkerOptions().position(coordinate).title(title));
-    }
-
     private class loadPoints extends AsyncTask<Void, Void, Boolean> {
         private Context mContext;
-
-        loadPoints() {
-
-        }
 
         @Override
         protected Boolean doInBackground(Void... params) {
@@ -289,11 +281,35 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                                 for(int i = 0; i < POIs.length(); i++) {
                                     JSONObject POI = POIs.getJSONObject(i);
                                     Double lat = POI.getDouble("lat");
-                                    Double long_ = POI.getDouble("long");
+                                    Double _long = POI.getDouble("long");
                                     String title = POI.getString("title");
+                                    String description = POI.getString("description");
+                                    int userId = POI.getInt("user_id");
+                                    int poiId = POI.getInt("pio_id");
+                                    String username = POI.getString("username");
 
-                                    mMap.addMarker(new MarkerOptions().position(new LatLng(lat, long_)).title(title));
+                                    MarkerInfo info = new MarkerInfo(lat, _long, title, description, userId, poiId, username);
+
+                                    Marker marker = mMap.addMarker(new MarkerOptions().position(new LatLng(lat, _long)).title(title));
+
+                                    marker.setTag(info);
                                 }
+
+                                mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+                                    @Override
+                                    public boolean onMarkerClick(Marker marker) {
+                                        MarkerInfo info = (MarkerInfo)marker.getTag();
+                                        Intent POIActivityIntent = new Intent(MapActivity.this, POIActivity.class);
+
+                                        POIActivityIntent.putExtra("title", info.getTitle());
+                                        POIActivityIntent.putExtra("description", info.getDescription());
+                                        POIActivityIntent.putExtra("username", info.getUsername());
+
+                                        MapActivity.this.startActivity(POIActivityIntent);
+                                        return false;
+                                    }
+                                });
+
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
@@ -330,6 +346,50 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         @Override
         protected void onCancelled() {
 
+        }
+
+        class MarkerInfo {
+            private double mLat;
+            private double mLong;
+            private String mTitle;
+            private String mDescription;
+            private int mUserId;
+            private int mPoiId;
+            private String mUsername;
+
+            MarkerInfo(double lat, double _long, String title, String description, int userId, int poiId, String username) {
+                mLat = lat;
+                mLong = _long;
+                mTitle = title;
+                mDescription = description;
+                mUserId = userId;
+                mPoiId = poiId;
+                mUsername = username;
+            }
+
+            public LatLng getLocation() {
+                return new LatLng(mLat, mLong);
+            }
+
+            public String getTitle() {
+                return mTitle;
+            }
+
+            public String getDescription() {
+                return mDescription;
+            }
+
+            public int getUserId() {
+                return mUserId;
+            }
+
+            public int getPoiId() {
+                return mPoiId;
+            }
+
+            public String getUsername() {
+                return mUsername;
+            }
         }
     }
 

@@ -34,7 +34,7 @@ router.post('/', requireAuth,
 });
 
 router.get('/', requireAuth, function(req, res) {
-    var getPOIs = "SELECT user_id, pio_id, ST_X(coordinates) AS \"lat\", ST_Y(coordinates) AS \"long\", title, description FROM point_of_interests;";
+    var getPOIs = "SELECT point_of_interests.user_id, username, pio_id, ST_X(coordinates) AS \"lat\", ST_Y(coordinates) AS \"long\", title, description FROM point_of_interests, users WHERE point_of_interests.user_id = users.user_id;";
 
     config.pool.query(getPOIs, function(err, rows) {
         if(err) {
@@ -51,7 +51,7 @@ router.get('/:id', requireAuth,
         field("req.params.id").isNumeric()
     ),
     function(req, res) {
-        var getPOI = "SELECT user_id, pio_id, ST_X(coordinates) AS \"lat\", ST_Y(coordinates) AS \"long\", title, description FROM point_of_interests WHERE pio_id = " + req.params.id;
+        var getPOI = "SELECT point_of_interests.user_id, pio_id, ST_X(coordinates) AS \"lat\", ST_Y(coordinates) AS \"long\", title, description FROM point_of_interests, users WHERE pio_id = " + req.params.id + " AND point_of_interests.user_id = users.user_id;";
 
         config.pool.query(getPOI, function(err, rows) {
             if(err) {
