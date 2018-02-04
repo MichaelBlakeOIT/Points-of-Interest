@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/empty"
+        android:title="options"
+        android:orderInCategory="101"
+        app:showAsAction="always"
+        android:icon="@drawable/ic_action_overflow">
+
+        <menu>
+
+            <item android:id="@+id/action_profile"
+                app:showAsAction="ifRoom"
+                android:title="Profile" />
+
+            <item android:id="@+id/action_settings"
+                app:showAsAction="ifRoom"
+                android:title="Settings" />
+
+            <item android:id="@+id/action_logout"
+                app:showAsAction="ifRoom"
+                android:title="Log Out" />
+
+        </menu>
+
+    </item>
+</menu>
