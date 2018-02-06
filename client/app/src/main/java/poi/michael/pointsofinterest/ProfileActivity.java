@@ -143,6 +143,78 @@ public class ProfileActivity extends AppCompatActivity {
                                 if (JSONResponse.getBoolean("success")) {
                                     Button followButton = (Button) findViewById(R.id.profile_follow);
                                     followButton.setText("Unfollow User");
+
+                                    final View button = findViewById(R.id.profile_follow);
+                                    button.setOnClickListener(new View.OnClickListener() {
+                                        public void onClick(View v) {
+                                            new UnfollowUserTask().execute();
+                                        }
+                                    });
+                                }
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                            //Log.d("Response", response);
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            // error
+                            //Log.d("Error.Response", error.toString());
+                        }
+                    }
+            ) {
+                @Override
+                public Map<String, String> getHeaders() throws AuthFailureError {
+                    SharedPreferences sharedPref = getSharedPreferences(getString(R.string.user_token), Context.MODE_PRIVATE);
+
+                    Map<String, String> params = new HashMap<String, String>();
+                    params.put("Authorization", "Bearer " + sharedPref.getString("token", ""));
+
+                    return params;
+                }
+
+                @Override
+                protected Map<String, String> getParams()
+                {
+                    Map<String, String>  params = new HashMap<>();
+                    params.put("username", mProfileUsername);
+
+                    return params;
+                }
+            };
+            volleySingleton.getInstance(mContext).getRequestQueue().add(putRequest);
+            return true;
+        }
+    }
+
+    private class UnfollowUserTask extends AsyncTask<Void, Void, Boolean> {
+        private Context mContext;
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            String url = getResources().getString(R.string.base_url) + "/user/follow";
+
+            mContext = getApplicationContext();
+
+            StringRequest putRequest = new StringRequest(Request.Method.DELETE, url,
+                    new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+                            // response
+                            try {
+                                JSONObject JSONResponse = new JSONObject(response);
+                                if (JSONResponse.getBoolean("success")) {
+                                    Button followButton = (Button) findViewById(R.id.profile_follow);
+                                    followButton.setText("Follow User");
+
+                                    final View button = findViewById(R.id.profile_follow);
+                                    button.setOnClickListener(new View.OnClickListener() {
+                                        public void onClick(View v) {
+                                            new FollowUserTask().execute();
+                                        }
+                                    });
                                 }
                             } catch (JSONException e) {
                                 e.printStackTrace();
