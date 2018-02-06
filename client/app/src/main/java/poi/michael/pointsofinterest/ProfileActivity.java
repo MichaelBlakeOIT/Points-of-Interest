@@ -129,7 +129,7 @@ public class ProfileActivity extends AppCompatActivity {
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            String url = getResources().getString(R.string.base_url) + "/user/follow";
+            String url = getResources().getString(R.string.base_url) + "/user/" + mProfileUsername +"/follow";
 
             mContext = getApplicationContext();
 
@@ -174,15 +174,6 @@ public class ProfileActivity extends AppCompatActivity {
 
                     return params;
                 }
-
-                @Override
-                protected Map<String, String> getParams()
-                {
-                    Map<String, String>  params = new HashMap<>();
-                    params.put("username", mProfileUsername);
-
-                    return params;
-                }
             };
             volleySingleton.getInstance(mContext).getRequestQueue().add(putRequest);
             return true;
@@ -194,11 +185,11 @@ public class ProfileActivity extends AppCompatActivity {
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            String url = getResources().getString(R.string.base_url) + "/user/follow";
+            String url = getResources().getString(R.string.base_url) + "/user/" + mProfileUsername +"/follow";
 
             mContext = getApplicationContext();
 
-            StringRequest putRequest = new StringRequest(Request.Method.DELETE, url,
+            StringRequest deleteRequest = new StringRequest(Request.Method.DELETE, url,
                     new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
@@ -239,18 +230,21 @@ public class ProfileActivity extends AppCompatActivity {
 
                     return params;
                 }
-
-                @Override
-                protected Map<String, String> getParams()
-                {
-                    Map<String, String>  params = new HashMap<>();
-                    params.put("username", mProfileUsername);
-
-                    return params;
-                }
             };
-            volleySingleton.getInstance(mContext).getRequestQueue().add(putRequest);
+            volleySingleton.getInstance(mContext).getRequestQueue().add(deleteRequest);
             return true;
         }
     }
+
+    /*View.OnClickListener UnfollowListener = new View.OnClickListener() {
+        public void onClick(View v) {
+            new UnfollowUserTask().execute();
+        }
+    };
+
+    View.OnClickListener FollowListener = new View.OnClickListener() {
+        public void onClick(View v) {
+            new FollowUserTask().execute();
+        }
+    };*/
 }
