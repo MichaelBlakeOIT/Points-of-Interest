@@ -126,7 +126,7 @@ router.get('/', requireAuth, function (req, res) {
     });
 });
 
-router.put('/follow', requireAuth, 
+router.put('/follow', requireAuth,
     form(field("username").required().isAlphanumeric().maxLength(16)),
     function (req, res) {
         if (!req.form.isValid) {
@@ -136,7 +136,7 @@ router.put('/follow', requireAuth,
 
         var user_id;
 
-        config.pool.query("SELECT user_id FROM users WHERE username = " + config.pool.escape(req.body.username) + ";", function(err, rows) {
+        config.pool.query("SELECT user_id FROM users WHERE username = " + config.pool.escape(req.body.username) + ";", function (err, rows) {
             if (err) {
                 console.log(err);
                 res.end();
@@ -157,7 +157,7 @@ router.put('/follow', requireAuth,
                 }
 
                 if (rows.length) {
-                    res.json({ success: false, message: "Already following user"});
+                    res.json({ success: false, message: "Already following user" });
                 }
 
                 config.pool.query("INSERT INTO following (follower_id, following_id) VALUES (" + req.user.user_id + "," + user_id + ");", function (err, rows) {
@@ -167,15 +167,15 @@ router.put('/follow', requireAuth,
                         res.end();
                         return;
                     }
-    
+
                     res.json({ success: true, message: "Now following user" });
                 });
-                
+
             });
         });
-});
+    });
 
-router.delete('/follow', requireAuth, 
+router.delete('/follow', requireAuth,
     form(field("username").required().isAlphanumeric().maxLength(16)),
     function (req, res) {
         if (!req.form.isValid) {
@@ -185,7 +185,7 @@ router.delete('/follow', requireAuth,
 
         var user_id;
 
-        config.pool.query("SELECT user_id FROM users WHERE username = " + config.pool.escape(req.body.username) + ";", function(err, rows) {
+        config.pool.query("SELECT user_id FROM users WHERE username = " + config.pool.escape(req.body.username) + ";", function (err, rows) {
             if (err) {
                 console.log(err);
                 res.end();
@@ -198,32 +198,19 @@ router.delete('/follow', requireAuth,
 
             user_id = rows[0].user_id;
 
-            config.pool.query("SELECT * FROM following WHERE follower_id = " + req.user.user_id + " AND following_id = " + user_id + ";", function (err, rows) {
+            config.pool.query("DELETE FROM following WHERE follower_id = " + req.user.user_id + " AND following_id = " + user_id + ";", function (err, rows) {
                 if (err) {
                     console.log(err);
                     res.end();
                     return;
                 }
-                
-                if (rows.length) {
-                    res.json({ success: false, message: "Already following user"});
+                if (rows.affectedRows == 0) {
+                    res.json({ success: false, message: "Not currently following user" });
+                    return;
                 }
-
-                config.pool.query("DELETE FROM following WHERE follower_id = " + req.user.user_id + " AND following_id = " + user_id + ";", function (err, rows) {
-                    if (err) {
-                        console.log(err);
-                        res.end();
-                        return;
-                    }
-                    if (rows.affectedRows == 0) {
-                        res.json({ success: false, message: "Not currently following user" });
-                        return;
-                    }
-                    res.json({ success: true, message: "Now following user" });
-                });
-                
+                res.json({ success: true, message: "Now following user" });
             });
         });
-});
+    });
 
 module.exports = router;
