@@ -208,7 +208,7 @@ router.delete('/follow', requireAuth,
                     res.json({ success: false, message: "Not currently following user" });
                     return;
                 }
-                res.json({ success: true, message: "Now following user" });
+                res.json({ success: true, message: "Unfollowed User" });
             });
         });
     });
