@@ -184,6 +184,7 @@ public class LoginActivity extends AppCompatActivity {
                                     SharedPreferences.Editor editor = sharedPref.edit();
 
                                     editor.putString("token", JSONResponse.getString("token"));
+                                    editor.putString("username", mUsername);
                                     editor.apply();
 
                                     Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_SHORT).show();

@@ -10,8 +10,8 @@ router.post('/',
     form(
         field("username").trim().required().isAlphanumeric().maxLength(16),
         field("password").required().minLength(6),
-        field("firstname").required().maxLength(35),
-        field("lastname").required().maxLength(35),
+        field("firstname").trim().required().maxLength(35),
+        field("lastname").trim().required().maxLength(35),
         field("email").trim().required().isEmail().maxLength(255)
     ),
     function (req, res) {
@@ -70,7 +70,7 @@ router.put('/', requireAuth,
             return;
         }
         var query = "UPDATE users SET bio = " + config.pool.escape(req.body.bio);
-        if(req.body.password) {
+        if (req.body.password) {
             var hash = bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(8), null);
             query += ", password = '" + hash;
         }
@@ -112,17 +112,118 @@ router.get('/:username', requireAuth,
 
 
 router.get('/', requireAuth, function (req, res) {
-        config.pool.query("SELECT user_id, username, first_name, last_name, bio, profile_photo FROM Users WHERE Username = " + config.pool.escape(req.user.username) + ";", function (err, rows) {
-            console.log("no errors");
+    config.pool.query("SELECT user_id, username, first_name, last_name, bio, profile_photo FROM Users WHERE Username = " + config.pool.escape(req.user.username) + ";", function (err, rows) {
+        console.log("no errors");
+        if (err) {
+            console.log(err);
+            res.end();
+            return;
+        }
+        if (rows.length) {
+            res.json({ success: true, message: rows[0] });
+            return;
+        }
+    });
+});
+
+router.put('/follow', requireAuth, 
+    form(field("username").required().isAlphanumeric().maxLength(16)),
+    function (req, res) {
+        if (!req.form.isValid) {
+            res.json({ success: false, message: req.form.errors });
+            return;
+        }
+
+        var user_id;
+
+        config.pool.query("SELECT user_id FROM users WHERE username = " + config.pool.escape(req.body.username) + ";", function(err, rows) {
             if (err) {
                 console.log(err);
                 res.end();
                 return;
             }
-            if (rows.length) {
-                res.json({ success: true, message: rows[0] });
+            if (!rows.length) {
+                res.json({ success: false, message: "Username doesn't exist" });
                 return;
             }
+
+            user_id = rows[0].user_id;
+
+            config.pool.query("SELECT * FROM following WHERE follower_id = " + req.user.user_id + " AND following_id = " + user_id + ";", function (err, rows) {
+                if (err) {
+                    console.log(err);
+                    res.end();
+                    return;
+                }
+
+                if (rows.length) {
+                    res.json({ success: false, message: "Already following user"});
+                }
+
+                config.pool.query("INSERT INTO following (follower_id, following_id) VALUES (" + req.user.user_id + "," + user_id + ");", function (err, rows) {
+
+                    if (err) {
+                        console.log(err);
+                        res.end();
+                        return;
+                    }
+    
+                    res.json({ success: true, message: "Now following user" });
+                });
+                
+            });
         });
-    });
+});
+
+router.delete('/follow', requireAuth, 
+    form(field("username").required().isAlphanumeric().maxLength(16)),
+    function (req, res) {
+        if (!req.form.isValid) {
+            res.json({ success: false, message: req.form.errors });
+            return;
+        }
+
+        var user_id;
+
+        config.pool.query("SELECT user_id FROM users WHERE username = " + config.pool.escape(req.body.username) + ";", function(err, rows) {
+            if (err) {
+                console.log(err);
+                res.end();
+                return;
+            }
+            if (!rows.length) {
+                res.json({ success: false, message: "Username doesn't exist" });
+                return;
+            }
+
+            user_id = rows[0].user_id;
+
+            config.pool.query("SELECT * FROM following WHERE follower_id = " + req.user.user_id + " AND following_id = " + user_id + ";", function (err, rows) {
+                if (err) {
+                    console.log(err);
+                    res.end();
+                    return;
+                }
+                
+                if (rows.length) {
+                    res.json({ success: false, message: "Already following user"});
+                }
+
+                config.pool.query("DELETE FROM following WHERE follower_id = " + req.user.user_id + " AND following_id = " + user_id + ";", function (err, rows) {
+                    if (err) {
+                        console.log(err);
+                        res.end();
+                        return;
+                    }
+                    if (rows.affectedRows == 0) {
+                        res.json({ success: false, message: "Not currently following user" });
+                        return;
+                    }
+                    res.json({ success: true, message: "Now following user" });
+                });
+                
+            });
+        });
+});
+
 module.exports = router;
