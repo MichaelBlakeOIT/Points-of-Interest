@@ -17,7 +17,7 @@ router.post('/',
     ), function (req, res) {
         console.log(req.body);
         if (!req.form.isValid)
-            res.json({ success: false, message: req.form.errors });
+            return res.json({ success: false, message: req.form.errors });
         config.pool.query("SELECT * FROM users WHERE username = " + config.pool.escape(req.body.username) + ";", function (err, rows) {
             if (err) {
                 console.log(err);
