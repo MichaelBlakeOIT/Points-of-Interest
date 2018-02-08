@@ -126,8 +126,8 @@ router.get('/', requireAuth, function (req, res) {
     });
 });
 
-router.put('/follow', requireAuth,
-    form(field("username").required().isAlphanumeric().maxLength(16)),
+router.post('/:username/follow', requireAuth,
+form(field("req.params.username").isAlphanumeric().maxLength(16)),
     function (req, res) {
         if (!req.form.isValid) {
             res.json({ success: false, message: req.form.errors });
@@ -136,7 +136,7 @@ router.put('/follow', requireAuth,
 
         var user_id;
 
-        config.pool.query("SELECT user_id FROM users WHERE username = " + config.pool.escape(req.body.username) + ";", function (err, rows) {
+        config.pool.query("SELECT user_id FROM users WHERE username = " + config.pool.escape(req.params.username) + ";", function (err, rows) {
             if (err) {
                 console.log(err);
                 res.end();
@@ -175,8 +175,8 @@ router.put('/follow', requireAuth,
         });
     });
 
-router.delete('/follow', requireAuth,
-    form(field("username").required().isAlphanumeric().maxLength(16)),
+router.delete('/:username/follow', requireAuth,
+    form(field("req.params.username").isAlphanumeric().maxLength(16)),
     function (req, res) {
         if (!req.form.isValid) {
             res.json({ success: false, message: req.form.errors });
@@ -185,7 +185,7 @@ router.delete('/follow', requireAuth,
 
         var user_id;
 
-        config.pool.query("SELECT user_id FROM users WHERE username = " + config.pool.escape(req.body.username) + ";", function (err, rows) {
+        config.pool.query("SELECT user_id FROM users WHERE username = " + config.pool.escape(req.params.username) + ";", function (err, rows) {
             if (err) {
                 console.log(err);
                 res.end();
@@ -205,11 +205,29 @@ router.delete('/follow', requireAuth,
                     return;
                 }
                 if (rows.affectedRows == 0) {
-                    res.json({ success: false, message: "Not currently following user" });
+                    res.status(400).json({ success: false, message: "Not currently following user" });
                     return;
                 }
                 res.json({ success: true, message: "Unfollowed User" });
             });
+        });
+    });
+
+router.post('/:username/avatar', requireAuth,
+    function (req, res) {
+        if (!req.files)
+            return res.status(400).json({ success: "false", message: "No files were uploaded." });
+        
+        // The name of the input field (i.e. "sampleFile") is used to retrieve the uploaded file
+        let sampleFile = req.files.sampleFile;
+        
+        sampleFile.mv('/' + req.user.username + '/avatar.jpg', function(err) {
+            if (err) {
+                console.log(err);
+                return res.status(500).json({ success: false, message: "Unknown Error" });
+            }
+        
+            res.json({ success: true, message: "Profile picture updated" });
         });
     });
 
