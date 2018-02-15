@@ -63,7 +63,7 @@ public class POIActivity extends AppCompatActivity {
         ratingbar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
             @Override
             public void onRatingChanged(RatingBar ratingBar, float v, boolean b) {
-
+                new RatePOITask((int)v).execute();
             }
         });
     }
@@ -78,11 +78,11 @@ public class POIActivity extends AppCompatActivity {
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            String url = getResources().getString(R.string.base_url) + "/" + mId + "/rating";
+            String url = getResources().getString(R.string.base_url) + "/poi/" + mId + "/rating";
 
             mContext = getApplicationContext();
 
-            StringRequest deleteRequest = new StringRequest(Request.Method.DELETE, url,
+            StringRequest ratingRequest = new StringRequest(Request.Method.POST, url,
                     new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
@@ -124,7 +124,7 @@ public class POIActivity extends AppCompatActivity {
                     return params;
                 }
             };
-            volleySingleton.getInstance(mContext).getRequestQueue().add(deleteRequest);
+            volleySingleton.getInstance(mContext).getRequestQueue().add(ratingRequest);
             return true;
         }
     }
