@@ -3,12 +3,16 @@ package poi.michael.pointsofinterest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,6 +28,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -89,9 +94,12 @@ public class ProfileActivity extends AppCompatActivity {
 
                                     TextView username = (TextView) findViewById(R.id.profile_username);
                                     TextView bio = (TextView) findViewById(R.id.profile_bio);
+                                    new DownloadImageTask((ImageView) findViewById(R.id.profile_picture))
+                                            .execute("https://s3.us-east-2.amazonaws.com/points-of-interest/profile_photos/" + mProfileUsername.toLowerCase() + ".jpg");
 
                                     username.setText(mProfileUsername);
                                     bio.setText(mBio);
+
                                 } else {
                                     //I don't know what to do...
                                 }
@@ -121,6 +129,31 @@ public class ProfileActivity extends AppCompatActivity {
             };
             volleySingleton.getInstance(mContext).getRequestQueue().add(postRequest);
             return true;
+        }
+    }
+
+    private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
+        ImageView bmImage;
+
+        public DownloadImageTask(ImageView bmImage) {
+            this.bmImage = bmImage;
+        }
+
+        protected Bitmap doInBackground(String... urls) {
+            String urldisplay = urls[0];
+            Bitmap mIcon11 = null;
+            try {
+                InputStream in = new java.net.URL(urldisplay).openStream();
+                mIcon11 = BitmapFactory.decodeStream(in);
+            } catch (Exception e) {
+                Log.e("Error", e.getMessage());
+                e.printStackTrace();
+            }
+            return mIcon11;
+        }
+
+        protected void onPostExecute(Bitmap result) {
+            bmImage.setImageBitmap(result);
         }
     }
 
@@ -235,16 +268,4 @@ public class ProfileActivity extends AppCompatActivity {
             return true;
         }
     }
-
-    /*View.OnClickListener UnfollowListener = new View.OnClickListener() {
-        public void onClick(View v) {
-            new UnfollowUserTask().execute();
-        }
-    };
-
-    View.OnClickListener FollowListener = new View.OnClickListener() {
-        public void onClick(View v) {
-            new FollowUserTask().execute();
-        }
-    };*/
 }

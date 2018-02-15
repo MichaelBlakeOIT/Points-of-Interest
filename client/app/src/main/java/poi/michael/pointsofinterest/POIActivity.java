@@ -3,12 +3,14 @@ package poi.michael.pointsofinterest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.location.Location;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
+import android.widget.RatingBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
@@ -24,6 +26,8 @@ import java.util.Map;
 
 public class POIActivity extends AppCompatActivity {
 
+    int mId;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -32,9 +36,10 @@ public class POIActivity extends AppCompatActivity {
         Intent intentExtras = getIntent();
 
         intentExtras.getExtras();
-        String title = intentExtras.getStringExtra("title");
-        String description = intentExtras.getStringExtra("description");
+        final String title = intentExtras.getStringExtra("title");
+        final String description = intentExtras.getStringExtra("description");
         final String username = intentExtras.getStringExtra("username");
+        mId = intentExtras.getIntExtra("id", 0);
 
         TextView title_view = (TextView) findViewById(R.id.poi_title);
         TextView description_view = (TextView) findViewById(R.id.poi_description);
@@ -52,5 +57,75 @@ public class POIActivity extends AppCompatActivity {
                 startActivity(poiActivityIntent);
             }
         });
+
+        final RatingBar ratingbar = (RatingBar) findViewById(R.id.ratingBar);
+
+        ratingbar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
+            @Override
+            public void onRatingChanged(RatingBar ratingBar, float v, boolean b) {
+
+            }
+        });
+    }
+
+    private class RatePOITask extends AsyncTask<Void, Void, Boolean> {
+        private Context mContext;
+        private int mRating;
+
+        RatePOITask(int rating) {
+            mRating = rating;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            String url = getResources().getString(R.string.base_url) + "/" + mId + "/rating";
+
+            mContext = getApplicationContext();
+
+            StringRequest deleteRequest = new StringRequest(Request.Method.DELETE, url,
+                    new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+                            // response
+                            try {
+                                JSONObject JSONResponse = new JSONObject(response);
+                                if (JSONResponse.getBoolean("success")) {
+                                    Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_SHORT).show();
+                                }
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                            //Log.d("Response", response);
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            // error
+                            //Log.d("Error.Response", error.toString());
+                        }
+                    }
+            ) {
+                @Override
+                protected Map<String, String> getParams()
+                {
+                    Map<String, String>  params = new HashMap<>();
+                    params.put("rating", Integer.toString(mRating));
+                    return params;
+                }
+
+                @Override
+                public Map<String, String> getHeaders() throws AuthFailureError {
+                    SharedPreferences sharedPref = getSharedPreferences(getString(R.string.user_token), Context.MODE_PRIVATE);
+
+                    Map<String, String> params = new HashMap<String, String>();
+                    params.put("Authorization", "Bearer " + sharedPref.getString("token", ""));
+
+                    return params;
+                }
+            };
+            volleySingleton.getInstance(mContext).getRequestQueue().add(deleteRequest);
+            return true;
+        }
     }
 }

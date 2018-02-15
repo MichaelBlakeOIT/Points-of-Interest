@@ -14,6 +14,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.amazonaws.mobile.client.AWSMobileClient;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -49,17 +50,9 @@ public class LoginActivity extends AppCompatActivity {
         mSignInButton.setOnClickListener(mSignInButtonListener);
         RegisterTextView.setOnClickListener(mRegisterSelectListener);
 
+        //AWSMobileClient.getInstance().initialize(this).execute();
+
         checkToken();
-
-        /*mEmailSignInButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                attemptLogin();
-            }
-        });*/
-
-       // mLoginFormView = findViewById(R.id.login_form);
-        //mProgressView = findViewById(R.id.login_progress);
     }
 
     private View.OnClickListener mSignInButtonListener = new View.OnClickListener()
@@ -70,9 +63,6 @@ public class LoginActivity extends AppCompatActivity {
             EditText password = (EditText) findViewById(R.id.passwordLoginField);
 
             new UserLoginTask(username.getText().toString(), password.getText().toString()).execute();
-            //mSignInButton.setText("TEST");
-            // Instantiate the RequestQueue.
-
         }
     };
 
