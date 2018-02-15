@@ -14,7 +14,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.amazonaws.mobile.client.AWSMobileClient;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;

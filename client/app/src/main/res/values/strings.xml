@@ -7,18 +7,13 @@
     <string name="prompt_password">Password</string>
     <string name="textview_register">Don\'t have an account?&#160;</string>
     <string name="textview_register_select">Register.</string>
-    <string name="action_sign_in">Sign in or register</string>
     <string name="action_sign_in_short">Sign in</string>
     <string name="error_invalid_email">This email address is invalid</string>
     <string name="error_invalid_password">This password is too short</string>
-    <string name="error_incorrect_password">This password is incorrect</string>
     <string name="error_field_required">This field is required</string>
     <string name="prompt_firstName">First Name</string>
     <string name="prompt_lastName">Last Name</string>
     <string name="title_activity_map">Map</string>
     <string name="user_token">userToken</string>
-    <string name="title_activity_test">test</string>
     <string name="base_url">https://points-of-interest.herokuapp.com</string>
-    <string name="title_activity_testmap">Map</string>
-    <string name="title_activity_testactivity">testactivity</string>
 </resources>
