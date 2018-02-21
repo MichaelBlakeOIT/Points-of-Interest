@@ -104,6 +104,9 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             case R.id.action_settings:
                 viewSettings();
                 return true;
+            case R.id.action_saved_pois:
+                viewSavedPois();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -408,6 +411,11 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private void viewSettings() {
         Intent SettingsActivityIntent = new Intent(MapActivity.this, SettingsActivity.class);
         MapActivity.this.startActivity(SettingsActivityIntent);
+    }
+
+    private void viewSavedPois() {
+        Intent SavedPOIsIntent = new Intent(MapActivity.this, SavedPois.class);
+        MapActivity.this.startActivity(SavedPOIsIntent);
     }
 
 }

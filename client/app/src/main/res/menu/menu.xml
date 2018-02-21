@@ -23,6 +23,10 @@
                 app:showAsAction="ifRoom"
                 android:title="Log Out" />
 
+            <item android:id="@+id/action_saved_pois"
+                app:showAsAction="ifRoom"
+                android:title="Saved POIs" />
+
         </menu>
 
     </item>
