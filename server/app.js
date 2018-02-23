@@ -12,7 +12,7 @@ var port = process.env.PORT || 3000;
 app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({ extended: true }) ); // get information from html forms
 app.use(passport.initialize());
-app.use('/user', require('./routes/user.js'));
+app.use('/users', require('./routes/user.js'));
 app.use('/session', require('./routes/session.js'));
 app.use('/poi', require('./routes/poi.js'));
 app.use('/', require('./routes/index.js'));

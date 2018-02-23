@@ -49,7 +49,7 @@
         <activity android:name=".ProfileActivity" />
         <activity android:name=".POIActivity" />
         <activity android:name=".SettingsActivity" />
-
+        <activity android:name=".SavedPois" />
         <service
             android:name="com.amazonaws.mobileconnectors.s3.transferutility.TransferService"
             android:enabled="true" />

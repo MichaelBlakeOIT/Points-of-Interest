@@ -16,7 +16,7 @@ router.get('/sign-s3', requireAuth, function(req, res) {
         const s3 = new aws.S3();
         const s3Params = {
             Bucket: process.env.S3_BUCKET_NAME,
-            Key: `profile/${req.user.username}`,
+            Key: req.user.username,
             Expires: 60,
             ContentType: "image/jpeg",
             ACL: 'public-read'

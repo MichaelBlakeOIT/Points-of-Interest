@@ -20,7 +20,7 @@ router.post('/',
             return;
         }
         config.pool.query("SELECT * FROM Users WHERE Username = " + config.pool.escape(req.body.username) + ";", function (err, rows) {
-            console.log("no errors");
+            console.log("no errors3");
             if (err) {
                 console.log(err);
                 res.end();
@@ -87,7 +87,7 @@ router.put('/', requireAuth,
 
     });
 
-router.get('/:username', requireAuth,
+router.get('/user/:username', requireAuth,
     form(
         field("req.params.username").isAlphanumeric().maxLength(16)
     ), function (req, res) {
@@ -97,7 +97,7 @@ router.get('/:username', requireAuth,
         }
 
         config.pool.query("SELECT user_id, username, first_name, last_name, bio, profile_photo FROM Users WHERE Username = " + config.pool.escape(req.params.username) + ";", function (err, rows) {
-            console.log("no errors");
+            console.log("no errors2");
             if (err) {
                 console.log(err);
                 res.end();
@@ -113,7 +113,7 @@ router.get('/:username', requireAuth,
 
 router.get('/', requireAuth, function (req, res) {
     config.pool.query("SELECT user_id, username, first_name, last_name, bio, profile_photo FROM Users WHERE Username = " + config.pool.escape(req.user.username) + ";", function (err, rows) {
-        console.log("no errors");
+        console.log("no errors1");
         if (err) {
             console.log(err);
             res.end();
@@ -126,8 +126,8 @@ router.get('/', requireAuth, function (req, res) {
     });
 });
 
-router.post('/:username/follow', requireAuth,
-form(field("req.params.username").isAlphanumeric().maxLength(16)),
+router.post('/user/:username/follow', requireAuth,
+    form(field("req.params.username").isAlphanumeric().maxLength(16)),
     function (req, res) {
         if (!req.form.isValid) {
             res.json({ success: false, message: req.form.errors });
@@ -175,7 +175,7 @@ form(field("req.params.username").isAlphanumeric().maxLength(16)),
         });
     });
 
-router.delete('/:username/follow', requireAuth,
+router.delete('/user/:username/follow', requireAuth,
     form(field("req.params.username").isAlphanumeric().maxLength(16)),
     function (req, res) {
         if (!req.form.isValid) {
@@ -213,22 +213,34 @@ router.delete('/:username/follow', requireAuth,
         });
     });
 
-router.post('/:username/avatar', requireAuth,
-    function (req, res) {
-        if (!req.files)
-            return res.status(400).json({ success: "false", message: "No files were uploaded." });
-        
-        // The name of the input field (i.e. "sampleFile") is used to retrieve the uploaded file
-        let sampleFile = req.files.sampleFile;
-        
-        sampleFile.mv('/' + req.user.username + '/avatar.jpg', function(err) {
-            if (err) {
-                console.log(err);
-                return res.status(500).json({ success: false, message: "Unknown Error" });
-            }
-        
-            res.json({ success: true, message: "Profile picture updated" });
-        });
+router.get('/pois/saved', requireAuth, function (req, res) {
+    var getPOIs = `SELECT point_of_interests.user_id AS "creator_id", username AS creator, point_of_interests.pio_id, ST_X(coordinates) AS "lat", ST_Y(coordinates) AS "long", point_of_interests.title, point_of_interests.description FROM saved_pois INNER JOIN point_of_interests ON point_of_interests.pio_id = saved_pois.poi_id INNER JOIN users ON point_of_interests.user_id = users.user_id WHERE saved_pois.user_id = ${req.user.user_id};`;
+
+    config.pool.query(getPOIs, function (err, rows) {
+        if (err) {
+            console.log(err);
+            return res.json({ success: false, message: "Unknown error" });
+        }
+        return res.json({ success: true, data: rows });
     });
+
+});
+
+router.get('/following', requireAuth, function (req, res) {
+    var getPOIs = `SELECT point_of_interests.user_id, pio_id, ST_X(coordinates) AS "lat", ST_Y(coordinates) AS "long", title, description 
+    FROM point_of_interests 
+    INNER JOIN following
+    ON point_of_interests.user_id = following_id
+    WHERE follower_id = ${req.user.user_id};`;
+
+    config.pool.query(getPOIs, function (err, rows) {
+        if (err) {
+            console.log(err);
+            return res.json({ success: false, message: "Unknown error" });
+        }
+        return res.json({ success: true, data: rows });
+    });
+
+});
 
 module.exports = router;

@@ -68,7 +68,7 @@ public class SignupActivity extends AppCompatActivity {
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            String url =  getResources().getString(R.string.base_url) + "/user";
+            String url =  getResources().getString(R.string.base_url) + "/users";
             mContext = getApplicationContext();
             Boolean success = true;
 

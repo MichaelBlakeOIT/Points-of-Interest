@@ -7,6 +7,7 @@ import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -63,7 +64,16 @@ public class POIActivity extends AppCompatActivity {
         ratingbar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
             @Override
             public void onRatingChanged(RatingBar ratingBar, float v, boolean b) {
-                new RatePOITask((int)v).execute();
+                new RatePOITask((int) v).execute();
+            }
+        });
+
+        final Button saveButton = (Button) findViewById(R.id.save_poi);
+
+        saveButton.setOnClickListener(new Button.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                new SavePOITask().execute();
             }
         });
     }
@@ -125,6 +135,55 @@ public class POIActivity extends AppCompatActivity {
                 }
             };
             volleySingleton.getInstance(mContext).getRequestQueue().add(ratingRequest);
+            return true;
+        }
+    }
+
+    private class SavePOITask extends AsyncTask<Void, Void, Boolean> {
+        private Context mContext;
+        private int mRating;
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            String url = getResources().getString(R.string.base_url) + "/poi/" + mId + "/save";
+
+            mContext = getApplicationContext();
+
+            StringRequest saveRequest = new StringRequest(Request.Method.POST, url,
+                    new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+                            // response
+                            try {
+                                JSONObject JSONResponse = new JSONObject(response);
+                                if (JSONResponse.getBoolean("success")) {
+                                    Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_SHORT).show();
+                                }
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                            //Log.d("Response", response);
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            // error
+                            //Log.d("Error.Response", error.toString());
+                        }
+                    }
+            ) {
+                @Override
+                public Map<String, String> getHeaders() throws AuthFailureError {
+                    SharedPreferences sharedPref = getSharedPreferences(getString(R.string.user_token), Context.MODE_PRIVATE);
+
+                    Map<String, String> params = new HashMap<String, String>();
+                    params.put("Authorization", "Bearer " + sharedPref.getString("token", ""));
+
+                    return params;
+                }
+            };
+            volleySingleton.getInstance(mContext).getRequestQueue().add(saveRequest);
             return true;
         }
     }

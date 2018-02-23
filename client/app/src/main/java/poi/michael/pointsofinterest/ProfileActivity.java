@@ -157,11 +157,11 @@ public class ProfileActivity extends AppCompatActivity {
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            String url = getResources().getString(R.string.base_url) + "/user/" + mProfileUsername +"/follow";
+            String url = getResources().getString(R.string.base_url) + "/users/user" + mProfileUsername +"/follow";
 
             mContext = getApplicationContext();
 
-            StringRequest putRequest = new StringRequest(Request.Method.PUT, url,
+            StringRequest putRequest = new StringRequest(Request.Method.POST, url,
                     new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
@@ -213,7 +213,7 @@ public class ProfileActivity extends AppCompatActivity {
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            String url = getResources().getString(R.string.base_url) + "/user/" + mProfileUsername +"/follow";
+            String url = getResources().getString(R.string.base_url) + "/users/user" + mProfileUsername +"/follow";
 
             mContext = getApplicationContext();
 

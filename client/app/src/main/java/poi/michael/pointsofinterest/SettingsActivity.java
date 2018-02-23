@@ -97,7 +97,7 @@ public class SettingsActivity extends AppCompatActivity {
         @Override
         protected Boolean doInBackground(Void... params) {
             // TODO: attempt authentication against a network service.
-            String url = getResources().getString(R.string.base_url) + "/user";
+            String url = getResources().getString(R.string.base_url) + "/users";
             mContext = getApplicationContext();
 
             StringRequest postRequest = new StringRequest(Request.Method.PUT, url,

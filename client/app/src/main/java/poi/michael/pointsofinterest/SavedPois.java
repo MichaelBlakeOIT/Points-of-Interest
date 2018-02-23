@@ -1,5 +1,8 @@
 package poi.michael.pointsofinterest;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -16,7 +19,13 @@ import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -24,6 +33,15 @@ import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /*public class SavedPois extends FragmentActivity {
 
@@ -53,12 +71,10 @@ public class SavedPois extends AppCompatActivity {
         mGridLayoutManager = new GridLayoutManager(this, 2);
         mLinearLayoutManager = new LinearLayoutManager(this);
 
+        new GetSavedPOIsTask().execute();
+
         // Set up the RecyclerView
-        mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
-        mRecyclerView.setHasFixedSize(true);
-        mRecyclerView.setLayoutManager(mLinearLayoutManager);
-        mRecyclerView.setAdapter(new MapAdapter(LIST_LOCATIONS));
-        mRecyclerView.setRecyclerListener(mRecycleListener);
+
     }
 
     private RecyclerView.RecyclerListener mRecycleListener = new RecyclerView.RecyclerListener() {
@@ -78,9 +94,9 @@ public class SavedPois extends AppCompatActivity {
 
     private class MapAdapter extends RecyclerView.Adapter<MapAdapter.ViewHolder> {
 
-        private NamedLocation[] namedLocations;
+        private List<NamedLocation> namedLocations;
 
-        private MapAdapter(NamedLocation[] locations) {
+        private MapAdapter(List<NamedLocation> locations) {
             super();
             namedLocations = locations;
         }
@@ -105,7 +121,7 @@ public class SavedPois extends AppCompatActivity {
 
         @Override
         public int getItemCount() {
-            return namedLocations.length;
+            return namedLocations.size();
         }
 
         class ViewHolder extends RecyclerView.ViewHolder implements OnMapReadyCallback {
@@ -150,7 +166,7 @@ public class SavedPois extends AppCompatActivity {
             }
 
             private void bindView(int pos) {
-                NamedLocation item = namedLocations[pos];
+                NamedLocation item = namedLocations.get(pos);
                 // Store a reference of the ViewHolder object in the layout.
                 layout.setTag(this);
                 // Store a reference to the item in the mapView's tag. We use it to get the
@@ -173,7 +189,8 @@ public class SavedPois extends AppCompatActivity {
         }
     }
 
-    private static final NamedLocation[] LIST_LOCATIONS = new NamedLocation[]{
+    private List<NamedLocation> list_locations = new ArrayList<>();
+    /*private NamedLocation[] list_locations = new NamedLocation[]{
             new NamedLocation("Cape Town", new LatLng(-33.920455, 18.466941)),
             new NamedLocation("Beijing", new LatLng(39.937795, 116.387224)),
             new NamedLocation("Bern", new LatLng(46.948020, 7.448206)),
@@ -208,5 +225,72 @@ public class SavedPois extends AppCompatActivity {
             new NamedLocation("Warsaw", new LatLng(52.235474, 21.004057)),
             new NamedLocation("Wellington", new LatLng(-41.286480, 174.776217)),
             new NamedLocation("Winnipeg", new LatLng(49.875832, -97.150726))
-    };
+    };*/
+
+    private class GetSavedPOIsTask extends AsyncTask<Void, Void, Boolean> {
+        private Context mContext;
+        private int mRating;
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            String url = getResources().getString(R.string.base_url) + "/users/pois/saved";
+
+            mContext = getApplicationContext();
+
+            StringRequest saveRequest = new StringRequest(Request.Method.GET, url,
+                    new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+                            // response
+                            try {
+                                JSONObject JSONResponse = new JSONObject(response);
+
+                                JSONArray POIs = JSONResponse.getJSONArray("data");
+
+                                for(int i = 0; i < POIs.length(); i++) {
+                                    JSONObject POI = POIs.getJSONObject(i);
+                                    Double lat = POI.getDouble("lat");
+                                    Double _long = POI.getDouble("long");
+                                    String title = POI.getString("title");
+                                    String description = POI.getString("description");
+                                    int userId = POI.getInt("creator_id");
+                                    int poiId = POI.getInt("pio_id");
+                                    String username = POI.getString("creator");
+
+                                    list_locations.add(new NamedLocation(title, new LatLng(lat, _long)));
+                                }
+
+                                mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+                                mRecyclerView.setHasFixedSize(true);
+                                mRecyclerView.setLayoutManager(mLinearLayoutManager);
+                                mRecyclerView.setAdapter(new MapAdapter(list_locations));
+                                mRecyclerView.setRecyclerListener(mRecycleListener);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                            //Log.d("Response", response);
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            // error
+                            //Log.d("Error.Response", error.toString());
+                        }
+                    }
+            ) {
+                @Override
+                public Map<String, String> getHeaders() throws AuthFailureError {
+                    SharedPreferences sharedPref = getSharedPreferences(getString(R.string.user_token), Context.MODE_PRIVATE);
+
+                    Map<String, String> params = new HashMap<String, String>();
+                    params.put("Authorization", "Bearer " + sharedPref.getString("token", ""));
+
+                    return params;
+                }
+            };
+            volleySingleton.getInstance(mContext).getRequestQueue().add(saveRequest);
+            return true;
+        }
+    }
 }
