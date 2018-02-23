@@ -43,20 +43,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/*public class SavedPois extends FragmentActivity {
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_saved_pois);
-
-        String[] names = { "test1", "test12", "test123" };
-        ListAdapter poi_adapter = new poi_custom_adapter(this, names);
-        ListView poi_list = (ListView) findViewById(R.id.poi_list);
-        poi_list.setAdapter(poi_adapter);
-    }
-}*/
-
 public class SavedPois extends AppCompatActivity {
     private RecyclerView mRecyclerView;
 
@@ -190,42 +176,6 @@ public class SavedPois extends AppCompatActivity {
     }
 
     private List<NamedLocation> list_locations = new ArrayList<>();
-    /*private NamedLocation[] list_locations = new NamedLocation[]{
-            new NamedLocation("Cape Town", new LatLng(-33.920455, 18.466941)),
-            new NamedLocation("Beijing", new LatLng(39.937795, 116.387224)),
-            new NamedLocation("Bern", new LatLng(46.948020, 7.448206)),
-            new NamedLocation("Breda", new LatLng(51.589256, 4.774396)),
-            new NamedLocation("Brussels", new LatLng(50.854509, 4.376678)),
-            new NamedLocation("Copenhagen", new LatLng(55.679423, 12.577114)),
-            new NamedLocation("Hannover", new LatLng(52.372026, 9.735672)),
-            new NamedLocation("Helsinki", new LatLng(60.169653, 24.939480)),
-            new NamedLocation("Hong Kong", new LatLng(22.325862, 114.165532)),
-            new NamedLocation("Istanbul", new LatLng(41.034435, 28.977556)),
-            new NamedLocation("Johannesburg", new LatLng(-26.202886, 28.039753)),
-            new NamedLocation("Lisbon", new LatLng(38.707163, -9.135517)),
-            new NamedLocation("London", new LatLng(51.500208, -0.126729)),
-            new NamedLocation("Madrid", new LatLng(40.420006, -3.709924)),
-            new NamedLocation("Mexico City", new LatLng(19.427050, -99.127571)),
-            new NamedLocation("Moscow", new LatLng(55.750449, 37.621136)),
-            new NamedLocation("New York", new LatLng(40.750580, -73.993584)),
-            new NamedLocation("Oslo", new LatLng(59.910761, 10.749092)),
-            new NamedLocation("Paris", new LatLng(48.859972, 2.340260)),
-            new NamedLocation("Prague", new LatLng(50.087811, 14.420460)),
-            new NamedLocation("Rio de Janeiro", new LatLng(-22.90187, -43.232437)),
-            new NamedLocation("Rome", new LatLng(41.889998, 12.500162)),
-            new NamedLocation("Sao Paolo", new LatLng(-22.863878, -43.244097)),
-            new NamedLocation("Seoul", new LatLng(37.560908, 126.987705)),
-            new NamedLocation("Stockholm", new LatLng(59.330650, 18.067360)),
-            new NamedLocation("Sydney", new LatLng(-33.873651, 151.2068896)),
-            new NamedLocation("Taipei", new LatLng(25.022112, 121.478019)),
-            new NamedLocation("Tokyo", new LatLng(35.670267, 139.769955)),
-            new NamedLocation("Tulsa Oklahoma", new LatLng(36.149777, -95.993398)),
-            new NamedLocation("Vaduz", new LatLng(47.141076, 9.521482)),
-            new NamedLocation("Vienna", new LatLng(48.209206, 16.372778)),
-            new NamedLocation("Warsaw", new LatLng(52.235474, 21.004057)),
-            new NamedLocation("Wellington", new LatLng(-41.286480, 174.776217)),
-            new NamedLocation("Winnipeg", new LatLng(49.875832, -97.150726))
-    };*/
 
     private class GetSavedPOIsTask extends AsyncTask<Void, Void, Boolean> {
         private Context mContext;

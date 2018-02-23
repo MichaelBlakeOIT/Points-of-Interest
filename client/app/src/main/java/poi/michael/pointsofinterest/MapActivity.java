@@ -66,16 +66,12 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         final View button = findViewById(R.id.new_poi);
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                // createFragment = new CreatePoiDialogFragment();
-                //createFragment.show(getSupportFragmentManager(), "this is a test");
                 Location location = getLastKnownLocation();
 
                 Intent AddPoiActivityIntent = new Intent(MapActivity.this, addPoiActivity.class);
                 AddPoiActivityIntent.putExtra("latitude", location.getLatitude());
                 AddPoiActivityIntent.putExtra("longitude", location.getLongitude());
                 startActivityForResult(AddPoiActivityIntent, CREATE_POI_REQUEST);
-                //mMap.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(), location.getLongitude())).title("123"));
-                //startActivity(AddPoiActivityIntent);
             }
         });
 
@@ -130,7 +126,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         }
     }
 
-    private void StartLocationTracking()
+    /*private void StartLocationTracking()
     {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
@@ -200,7 +196,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 }
             });
         }
-    }
+    }*/
 
     /**
      * Manipulates the map once available.
