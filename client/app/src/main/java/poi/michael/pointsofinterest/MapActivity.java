@@ -19,6 +19,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.CheckBox;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
@@ -37,6 +38,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,17 +55,16 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
 
-        //getSupportActionBar().setTitle("Your Activity Title"); // for set actionbar title
-       // getSupportActionBar().setDisplayHomeAsUpEnabled(true); // for add back arrow in action bar
+        final Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        final CheckBox checkbox = (CheckBox) findViewById(R.id.checkBox);
+        final View button = findViewById(R.id.new_poi);
 
-        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        final View button = findViewById(R.id.new_poi);
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 Location location = getLastKnownLocation();
@@ -75,7 +76,21 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             }
         });
 
-        new loadPoints().execute();
+        checkbox.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (checkbox.isChecked() && mMap != null) {
+                    mMap.clear();
+                    new loadPoints(true).execute();
+                }
+                else if (mMap != null) {
+                    mMap.clear();
+                    new loadPoints(false).execute();
+                }
+            }
+        });
+
+        new loadPoints(false).execute();
 
         //mUserLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
     }
@@ -256,11 +271,18 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     private class loadPoints extends AsyncTask<Void, Void, Boolean> {
         private Context mContext;
+        private boolean mOnlyFollowed;
+        loadPoints(boolean onlyFollowed) {
+            mOnlyFollowed = onlyFollowed;
+        }
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
-            String url = getResources().getString(R.string.base_url) + "/poi";
+            String url;
+            if(mOnlyFollowed)
+                url = getResources().getString(R.string.base_url) + "/users/following";
+            else
+                url = getResources().getString(R.string.base_url) + "/poi";
             mContext = getApplicationContext();
 
             StringRequest postRequest = new StringRequest(Request.Method.GET, url,
@@ -282,8 +304,10 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                                     int userId = POI.getInt("user_id");
                                     int poiId = POI.getInt("pio_id");
                                     String username = POI.getString("username");
+                                    Float rating = BigDecimal.valueOf(POI.getDouble("rating")).floatValue();
 
-                                    MarkerInfo info = new MarkerInfo(lat, _long, title, description, userId, poiId, username);
+                                    //MarkerInfo info = new MarkerInfo(lat, _long, title, description, userId, poiId, username, (float)5);
+                                    MarkerInfo info = new MarkerInfo(lat, _long, title, description, userId, poiId, username, rating);
 
                                     Marker marker = mMap.addMarker(new MarkerOptions().position(new LatLng(lat, _long)).title(title));
 
@@ -300,6 +324,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                                         POIActivityIntent.putExtra("description", info.getDescription());
                                         POIActivityIntent.putExtra("username", info.getUsername());
                                         POIActivityIntent.putExtra("id", info.getPoiId());
+                                        POIActivityIntent.putExtra("rating", info.getRating());
 
                                         MapActivity.this.startActivity(POIActivityIntent);
                                         return false;
@@ -352,8 +377,9 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             private int mUserId;
             private int mPoiId;
             private String mUsername;
+            private Float mRating;
 
-            MarkerInfo(double lat, double _long, String title, String description, int userId, int poiId, String username) {
+            MarkerInfo(double lat, double _long, String title, String description, int userId, int poiId, String username, Float rating) {
                 mLat = lat;
                 mLong = _long;
                 mTitle = title;
@@ -361,6 +387,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 mUserId = userId;
                 mPoiId = poiId;
                 mUsername = username;
+                mRating = rating;
             }
 
             public LatLng getLocation() {
@@ -386,6 +413,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             public String getUsername() {
                 return mUsername;
             }
+
+            public Float getRating() { return mRating; }
         }
     }
 

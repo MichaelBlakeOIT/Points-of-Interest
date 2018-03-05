@@ -3,6 +3,7 @@ package poi.michael.pointsofinterest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.media.Rating;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -40,15 +41,19 @@ public class POIActivity extends AppCompatActivity {
         final String title = intentExtras.getStringExtra("title");
         final String description = intentExtras.getStringExtra("description");
         final String username = intentExtras.getStringExtra("username");
+        final Float rating = intentExtras.getFloatExtra("rating", 0);
         mId = intentExtras.getIntExtra("id", 0);
 
         TextView title_view = (TextView) findViewById(R.id.poi_title);
         TextView description_view = (TextView) findViewById(R.id.poi_description);
         TextView username_view = (TextView) findViewById(R.id.poi_username);
+        RatingBar ratingbar = (RatingBar) findViewById(R.id.ratingBar);
 
         title_view.setText(title);
         description_view.setText(description);
         username_view.setText("Created by " + username);
+        ratingbar.setRating(rating);
+        ratingbar.setIsIndicator(true);
 
         final View button = findViewById(R.id.poi_username);
         button.setOnClickListener(new View.OnClickListener() {
@@ -58,8 +63,6 @@ public class POIActivity extends AppCompatActivity {
                 startActivity(poiActivityIntent);
             }
         });
-
-        final RatingBar ratingbar = (RatingBar) findViewById(R.id.ratingBar);
 
         ratingbar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
             @Override

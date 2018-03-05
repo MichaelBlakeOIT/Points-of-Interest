@@ -49,6 +49,8 @@ public class SavedPois extends AppCompatActivity {
     private LinearLayoutManager mLinearLayoutManager;
     private GridLayoutManager mGridLayoutManager;
 
+    private List<NamedLocation> list_locations = new ArrayList<>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -163,19 +165,6 @@ public class SavedPois extends AppCompatActivity {
             }
         }
     }
-
-    private static class NamedLocation {
-
-        public final String name;
-        public final LatLng location;
-
-        NamedLocation(String name, LatLng location) {
-            this.name = name;
-            this.location = location;
-        }
-    }
-
-    private List<NamedLocation> list_locations = new ArrayList<>();
 
     private class GetSavedPOIsTask extends AsyncTask<Void, Void, Boolean> {
         private Context mContext;
