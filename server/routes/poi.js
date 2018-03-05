@@ -101,7 +101,9 @@ router.post('/:id/save', requireAuth, form(field("id").required().isInt()),
     });
 
 router.get('/', requireAuth, function (req, res) {
-    var getPOIs = "SELECT point_of_interests.user_id, username, pio_id, ST_X(coordinates) AS \"lat\", ST_Y(coordinates) AS \"long\", title, description FROM point_of_interests, users WHERE point_of_interests.user_id = users.user_id;";
+    var getPOIs = `SELECT point_of_interests.user_id, username, pio_id, ST_X(coordinates) AS "lat", ST_Y(coordinates) AS "long", title, description, IFNULL((SELECT AVG(rating) FROM pio_ratings WHERE poi_id = point_of_interests.pio_id), 0) AS rating 
+                   FROM point_of_interests
+                   INNER JOIN users ON point_of_interests.user_id = users.user_id;`;
 
     config.pool.query(getPOIs, function (err, rows) {
         if (err) {
@@ -113,8 +115,14 @@ router.get('/', requireAuth, function (req, res) {
 
 });
 
-router.get('/:id', requireAuth, function (req, res) {
-    var getPOI = "SELECT point_of_interests.user_id, pio_id, ST_X(coordinates) AS \"lat\", ST_Y(coordinates) AS \"long\", title, description FROM point_of_interests, users WHERE pio_id = " + config.pool.escape(req.params.id) + " AND point_of_interests.user_id = users.user_id;";
+router.get('/:id', requireAuth, form(field("id").required().isInt()), function (req, res) {
+    if (!req.form.isValid)
+        return res.json({ success: false, message: req.form.errors });
+
+    var getPOI = `SELECT point_of_interests.user_id, pio_id, ST_X(coordinates) AS "lat", ST_Y(coordinates) AS "long", title, description, IFNULL((SELECT AVG(rating) FROM pio_ratings WHERE poi_id = ${req.params.id}), 0) AS rating
+    FROM point_of_interests
+    INNER JOIN users ON point_of_interests.user_id = users.user_id 
+    WHERE pio_id = ${req.params.id};`;
 
     config.pool.query(getPOI, function (err, rows) {
         if (err) {
@@ -135,7 +143,6 @@ router.get('/:id/rating', function (req, res) {
         }
         res.json({ success: true, data: { poi_id: req.params.id, average_rating: rows[0].rating, votes: rows[0].votes } });
     });
-
 });
 
 module.exports = router;

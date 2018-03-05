@@ -96,16 +96,32 @@ router.get('/user/:username', requireAuth,
             return;
         }
 
-        config.pool.query("SELECT user_id, username, first_name, last_name, bio, profile_photo FROM Users WHERE Username = " + config.pool.escape(req.params.username) + ";", function (err, rows) {
-            console.log("no errors2");
+        var user_query = `SELECT user_id, username, first_name, last_name, bio, profile_photo 
+                          FROM Users 
+                          WHERE Username = ${config.pool.escape(req.params.username)};`;
+
+        config.pool.query(user_query, function (err, rows) {
             if (err) {
                 console.log(err);
                 res.end();
                 return;
             }
             if (rows.length) {
-                res.json({ success: true, message: rows[0] });
-                return;
+                var user = rows[0];
+
+                var poi_query = `SELECT pio_id, ST_X(coordinates) AS "lat", ST_Y(coordinates) AS "long", title, description, IFNULL((SELECT AVG(rating) FROM pio_ratings WHERE poi_id = point_of_interests.pio_id), 0) AS rating 
+                                 FROM point_of_interests 
+                                 WHERE user_id = ${rows[0].user_id};`;
+
+                config.pool.query(poi_query, function (err2, rows2) {
+                    if (err) {
+                        console.log(err2);
+                        res.end();
+                        return;
+                    }
+                    res.json({ success: true, message: { user: user, pois: rows2 }});
+                    return;
+                });
             }
         });
     });
@@ -113,7 +129,6 @@ router.get('/user/:username', requireAuth,
 
 router.get('/', requireAuth, function (req, res) {
     config.pool.query("SELECT user_id, username, first_name, last_name, bio, profile_photo FROM Users WHERE Username = " + config.pool.escape(req.user.username) + ";", function (err, rows) {
-        console.log("no errors1");
         if (err) {
             console.log(err);
             res.end();
@@ -227,10 +242,10 @@ router.get('/pois/saved', requireAuth, function (req, res) {
 });
 
 router.get('/following', requireAuth, function (req, res) {
-    var getPOIs = `SELECT point_of_interests.user_id, pio_id, ST_X(coordinates) AS "lat", ST_Y(coordinates) AS "long", title, description 
+    var getPOIs = `SELECT users.user_id, username, point_of_interests.user_id, pio_id, ST_X(coordinates) AS "lat", ST_Y(coordinates) AS "long", title, description,  IFNULL((SELECT AVG(rating) FROM pio_ratings WHERE poi_id = point_of_interests.pio_id), 0) as rating
     FROM point_of_interests 
-    INNER JOIN following
-    ON point_of_interests.user_id = following_id
+    INNER JOIN following ON point_of_interests.user_id = following_id
+    INNER JOIN users ON users.user_id = following_id
     WHERE follower_id = ${req.user.user_id};`;
 
     config.pool.query(getPOIs, function (err, rows) {
