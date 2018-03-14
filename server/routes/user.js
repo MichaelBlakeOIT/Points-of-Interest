@@ -3,7 +3,6 @@ var config = require('./../config/data');
 var bcrypt = require('bcrypt');
 var form = require('express-form');
 var passport = require('passport');
-var nodemailer = require('nodemailer');
 const requireAuth = passport.authenticate('jwt', { session: false });
 var field = form.field;
 
@@ -269,7 +268,7 @@ router.post('/reset', function (req, res) {
       code += possible.charAt(Math.floor(Math.random() * possible.length));
 
     var getEmail = `SELECT email FROM users WHERE username = ${config.pool.escape(req.body.username)};`
-    var reset = `UPDATE users SET reset = ${code} WHERE username = ${config.pool.escape(req.body.username)};`
+    var reset = `UPDATE users SET reset = '${code}' WHERE username = ${config.pool.escape(req.body.username)};`
 
     config.pool.query(getEmail, function(err, rows) {
         if (err) {
@@ -277,7 +276,7 @@ router.post('/reset', function (req, res) {
             return res.json({ success: false, message: "Unknown error" });
         }
         if (rows.length) {
-            email = rows[0];
+            email = rows[0].email;
             config.pool.query(reset, function (err, rows1) {
                 if (err) {
                     console.log(err);
@@ -290,15 +289,45 @@ router.post('/reset', function (req, res) {
     });
 });
 
+router.put('/reset', 
+    form(field("username").isAlphanumeric().maxLength(16),
+         field("password").required(),
+         field("code").minLength(5).required()), 
+    function (req, res) {
+        var check = `SELECT user_id FROM users WHERE username = ${config.pool.escape(req.body.username)} AND reset = ${config.pool.escape(req.body.code)};`;
+
+        config.pool.query(check, function(err, rows) {
+            if (err) {
+                console.log(err);
+                return res.json({ success: false, message: "Unknown error" });
+            }
+            if (rows.length) {
+                //password can be reset
+                var update = `UPDATE users SET password = '${bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(8), null)}' WHERE username = ${config.pool.escape(req.body.username)};`;
+                console.log("update: ", update);
+                config.pool.query(update, function(err, rows) {
+                    if (err) {
+                        console.log(err);
+                        return res.json({ success: false, message: "Unknown error" });
+                    } 
+                    return res.json({ success: true, message: "Successfully reset password" });
+                });
+            } else {
+                return res.json({ success: false, message: "Code invalid" });
+            }
+        });
+});
+
 function sendResetEmail(code, email) {
+    console.log("email: ", email);
     var mailOptions = {
         from: 'helpatpoi@gmail.com',
         to: email,
         subject: 'Password Reset Requested For POI',
-        text: 'Hello. This is where you reset your password.'
+        text: 'Hello. This is where you reset your password.\n' + code
     };
     
-    transporter.sendMail(mailOptions, function(error, info) {
+    config.transporter.sendMail(mailOptions, function(error, info) {
         if (error) {
             console.log(error);
         } else {
@@ -306,5 +335,7 @@ function sendResetEmail(code, email) {
         }
     });
 }
+
+
 
 module.exports = router;
