@@ -118,6 +118,9 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             case R.id.action_saved_pois:
                 viewSavedPois();
                 return true;
+            case R.id.action_feed:
+                viewFeed();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -443,4 +446,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         MapActivity.this.startActivity(SavedPOIsIntent);
     }
 
+    private void viewFeed() {
+        Intent FeedIntent = new Intent(MapActivity.this, FeedActivity.class);
+        MapActivity.this.startActivity(FeedIntent);
+    }
 }

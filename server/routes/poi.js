@@ -133,8 +133,8 @@ router.get('/:id', requireAuth, form(field("id").required().isInt()), function (
     });
 });
 
-router.get('/:id/rating', function (req, res) {
-    var getRating = `SELECT avg(rating) AS rating, COUNT(*) AS votes FROM pio_ratings WHERE poi_id = ${config.pool.escape(req.params.id)};`;
+router.get('/:id/rating', form(field("id").required().isInt()), function (req, res) {
+    var getRating = `SELECT avg(rating) AS rating, COUNT(*) AS votes FROM pio_ratings WHERE poi_id = ${req.params.id};`;
 
     config.pool.query(getRating, function (err, rows) {
         if (err) {
@@ -142,6 +142,43 @@ router.get('/:id/rating', function (req, res) {
             return res.json({ success: false, message: "Unknown error" });
         }
         res.json({ success: true, data: { poi_id: req.params.id, average_rating: rows[0].rating, votes: rows[0].votes } });
+    });
+});
+
+router.post('/:id/comments', requireAuth,
+    form(
+        field("id").required().isInt(),
+        field("comment").required().minLength(1).maxLength(255)
+    ), function (req, res) {
+
+        if (!req.form.isValid)
+            return res.json({ success: false, message: req.form.errors });
+
+        var createComment = `INSERT INTO comments (point_of_interest_id, user_id, comment) VALUES (${req.params.id}, ${req.user.user_id}, ${config.pool.escape(req.body.comment)} )`;
+
+        config.pool.query(createComment, function (err, rows) {
+            if (err) {
+                console.log(err);
+                return res.json({ success: false, message: "Unknown error" });
+            }
+            res.json({ success: true, message: "Successfully created comment" });
+        });
+});
+
+router.get('/:id/comments', requireAuth, form(field("id").required().isInt()), function (req, res) {
+    if (!req.form.isValid) {
+        return res.json({ success: false, message: req.form.errors });
+    }
+    var selectComment = `SELECT username, comment, point_of_interest_id, comment_id, comments.user_id FROM comments 
+                         INNER JOIN users ON users.user_id = comments.user_id
+                         WHERE point_of_interest_id = ${req.params.id};`;
+
+    config.pool.query(selectComment, function (err, rows) {
+        if (err) {
+            console.log(err);
+            return res.json({ success: false, message: "Unknown error" });
+        }
+        res.json({ success: true, data: rows });
     });
 });
 

@@ -3,6 +3,7 @@ var config = require('./../config/data');
 var bcrypt = require('bcrypt');
 var form = require('express-form');
 var passport = require('passport');
+var nodemailer = require('nodemailer');
 const requireAuth = passport.authenticate('jwt', { session: false });
 var field = form.field;
 
@@ -241,6 +242,7 @@ router.get('/pois/saved', requireAuth, function (req, res) {
 
 });
 
+
 router.get('/following', requireAuth, function (req, res) {
     var getPOIs = `SELECT users.user_id, username, point_of_interests.user_id, pio_id, ST_X(coordinates) AS "lat", ST_Y(coordinates) AS "long", title, description,  IFNULL((SELECT AVG(rating) FROM pio_ratings WHERE poi_id = point_of_interests.pio_id), 0) as rating
     FROM point_of_interests 
@@ -257,5 +259,52 @@ router.get('/following', requireAuth, function (req, res) {
     });
 
 });
+
+router.post('/reset', function (req, res) {
+    var code = "";
+    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    var email = "";
+
+    for (var i = 0; i < 5; i++)
+      code += possible.charAt(Math.floor(Math.random() * possible.length));
+
+    var getEmail = `SELECT email FROM users WHERE username = ${config.pool.escape(req.body.username)};`
+    var reset = `UPDATE users SET reset = ${code} WHERE username = ${config.pool.escape(req.body.username)};`
+
+    config.pool.query(getEmail, function(err, rows) {
+        if (err) {
+            console.log(err);
+            return res.json({ success: false, message: "Unknown error" });
+        }
+        if (rows.length) {
+            email = rows[0];
+            config.pool.query(reset, function (err, rows1) {
+                if (err) {
+                    console.log(err);
+                    return res.json({ success: false, message: "Unknown error" });
+                }
+                sendResetEmail(code, email);
+                return res.json({ success: true, message: "If this account exists, an email will be sent."});
+            });
+        }
+    });
+});
+
+function sendResetEmail(code, email) {
+    var mailOptions = {
+        from: 'helpatpoi@gmail.com',
+        to: email,
+        subject: 'Password Reset Requested For POI',
+        text: 'Hello. This is where you reset your password.'
+    };
+    
+    transporter.sendMail(mailOptions, function(error, info) {
+        if (error) {
+            console.log(error);
+        } else {
+          console.log('Email sent: ' + info.response);
+        }
+    });
+}
 
 module.exports = router;
