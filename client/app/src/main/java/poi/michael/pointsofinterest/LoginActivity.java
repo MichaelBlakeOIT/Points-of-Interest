@@ -245,5 +245,10 @@ public class LoginActivity extends AppCompatActivity {
             LoginActivity.this.finish();
         }
     }
+
+    public void launchForgot(View v) {
+        Intent forgotIntent = new Intent(LoginActivity.this, ForgotPasswordActivity.class);
+        LoginActivity.this.startActivity(forgotIntent);
+    }
 }
 

@@ -1,5 +1,6 @@
 package poi.michael.pointsofinterest;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -96,6 +97,7 @@ public class FeedActivity extends AppCompatActivity {
             TextView title;
             GoogleMap map;
             Button comments;
+            Button photos;
             View layout;
 
             private ViewHolder(View itemView) {
@@ -104,6 +106,7 @@ public class FeedActivity extends AppCompatActivity {
                 mapView = (MapView) layout.findViewById(R.id.lite_listrow_map);
                 title = (TextView) layout.findViewById(R.id.saved_poi_title);
                 comments = (Button) layout.findViewById(R.id.comments_button);
+                photos = (Button) layout.findViewById(R.id.photos_button);
                 if (mapView != null) {
                     // Initialise the MapView
                     mapView.onCreate(null);
@@ -149,6 +152,16 @@ public class FeedActivity extends AppCompatActivity {
                             Intent commentsIntent = new Intent(FeedActivity.this, CommentActivity.class);
                             commentsIntent.putExtra("poi_id", mPoiId);
                             FeedActivity.this.startActivity(commentsIntent);
+                        }
+                    }
+                });
+                photos.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        if(mPoiId != -1) {
+                            Intent photosIntent = new Intent(FeedActivity.this, PhotosActivity.class);
+                            photosIntent.putExtra("poi_id", mPoiId);
+                            FeedActivity.this.startActivity(photosIntent);
                         }
                     }
                 });

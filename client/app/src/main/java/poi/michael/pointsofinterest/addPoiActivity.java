@@ -69,7 +69,6 @@ public class addPoiActivity extends AppCompatActivity {
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
             String url = getResources().getString(R.string.base_url) + "/poi";
             mContext = getApplicationContext();
 

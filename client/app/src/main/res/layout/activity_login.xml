@@ -1,4 +1,5 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -53,7 +54,6 @@
                     android:textCursorDrawable="@null"
                     android:backgroundTint="@android:color/holo_blue_bright"
                     android:hint="@string/prompt_password"
-                    android:imeActionId="@+id/login"
                     android:imeActionLabel="@string/action_sign_in_short"
                     android:imeOptions="actionUnspecified"
                     android:inputType="textPassword"
@@ -74,15 +74,21 @@
         </LinearLayout>
     </ScrollView>
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:layout_marginTop="8dp">
+
         <LinearLayout
-            android:orientation="horizontal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
-            android:layout_centerHorizontal="true">
             <TextView
                 android:id="@+id/textView4"
                 android:layout_width="wrap_content"
@@ -100,6 +106,34 @@
                 android:text="@string/textview_register_select"
                 android:textStyle="bold" />
         </LinearLayout>
-    </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <TextView
+                android:id="@+id/forgot_password_text"
+                android:layout_width="match_parent"
+                android:gravity="center"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start"
+                android:layout_marginStart="11dp"
+                android:layout_marginTop="22dp"
+                android:text="Forgot password?" />
+
+            <TextView
+                android:id="@+id/forgot_select"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:text=" Reset it."
+                android:onClick="launchForgot"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+    </LinearLayout>
 
 </LinearLayout>

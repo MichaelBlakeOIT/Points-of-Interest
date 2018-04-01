@@ -53,7 +53,7 @@ public class ProfileActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Intent intentExtras = getIntent();
-        mProfileUsername = intentExtras.getStringExtra("username");
+        mProfileUsername = intentExtras.getStringExtra("username").replaceAll("\\s+","");
         mLinearLayoutManager = new LinearLayoutManager(this);
 
         SharedPreferences sharedPref = getSharedPreferences(getString(R.string.user_token), Context.MODE_PRIVATE);
@@ -67,12 +67,12 @@ public class ProfileActivity extends AppCompatActivity {
             followButton.setVisibility(View.GONE);
         }
 
-        final View button = findViewById(R.id.profile_follow);
+        /*Button button = (Button) findViewById(R.id.profile_follow);
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 new FollowUserTask().execute();
             }
-        });
+        });*/
 
         new GetProfileDetailsTask().execute();
     }
@@ -130,12 +130,14 @@ public class ProfileActivity extends AppCompatActivity {
             TextView title;
             GoogleMap map;
             View layout;
+            Button comments;
 
             private ViewHolder(View itemView) {
                 super(itemView);
                 layout = itemView;
                 mapView = (MapView) layout.findViewById(R.id.lite_listrow_map);
                 title = (TextView) layout.findViewById(R.id.saved_poi_title);
+                comments = (Button) layout.findViewById(R.id.comments_button);
                 if (mapView != null) {
                     // Initialise the MapView
                     mapView.onCreate(null);
@@ -294,7 +296,8 @@ public class ProfileActivity extends AppCompatActivity {
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            String url = getResources().getString(R.string.base_url) + "/users/user" + mProfileUsername +"/follow";
+            String url = getResources().getString(R.string.base_url) + "/users/user/" + mProfileUsername + "/follow";
+            Log.e("url", url);
 
             mContext = getApplicationContext();
 
@@ -350,7 +353,7 @@ public class ProfileActivity extends AppCompatActivity {
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            String url = getResources().getString(R.string.base_url) + "/users/user" + mProfileUsername + "/follow";
+            String url = getResources().getString(R.string.base_url) + "/users/user/" + mProfileUsername + "/follow";
 
             mContext = getApplicationContext();
 
@@ -399,5 +402,9 @@ public class ProfileActivity extends AppCompatActivity {
             volleySingleton.getInstance(mContext).getRequestQueue().add(deleteRequest);
             return true;
         }
+    }
+
+    public void followUser(View v) {
+        new FollowUserTask().execute();
     }
 }
