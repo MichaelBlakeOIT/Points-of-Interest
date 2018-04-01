@@ -17,9 +17,9 @@ router.post('/', requireAuth,
         if (!req.form.isValid)
             return res.json({ success: false, message: req.form.errors });
         //format insert
-        var insert = "INSERT INTO point_of_interests (coordinates, user_id, title, description) VALUES " +
-            "(ST_GeomFromText('POINT(" + config.pool.escape(req.body.lat) + " " + config.pool.escape(req.body.long) + ")'), " + req.user.user_id +
-            ", " + config.pool.escape(req.body.title);
+        var insert = `INSERT INTO point_of_interests (coordinates, user_id, title, description) VALUES 
+                        (ST_GeomFromText('POINT(${req.body.lat} ${req.body.long})'), ${req.user.user_id},
+                        ${config.pool.escape(req.body.title)}`;
         if (req.body.description != '') {
             insert += ", " + config.pool.escape(req.body.description);
         }
@@ -33,6 +33,35 @@ router.post('/', requireAuth,
             res.json({ success: true, message: "successfully added point" });
         });
     });
+
+router.post('/share', requireAuth, form(field("poi_id").required().isNumeric()), function (req, res) {
+    if (!req.form.isValid)
+        return res.json({ success: false, message: req.form.errors });
+    var select = `SELECT user_id, pio_id, ST_X(coordinates) AS "lat", ST_Y(coordinates) AS "long", title, description FROM point_of_interests WHERE pio_id = ${req.body.poi_id};`;
+    
+    config.pool.query(select, function(err, rows) {
+        if (err) {
+            console.log(err);
+            return res.json({ success: false, message: "Unknown error" });
+        }
+
+        if (!rows.length) {
+            return res.json({ success: false, message: "Point doesn't exist" });
+        }
+
+        var insert = `INSERT INTO point_of_interests (coordinates, user_id, title, description, shared) VALUES 
+                    (ST_GeomFromText('POINT(${rows[0].lat + ' ' + rows[0].long})'), ${rows[0].user_id}, ${config.pool.escape(rows[0].title)},
+                    ${config.pool.escape(rows[0].description)}, ${req.user.user_id});`;
+
+        config.pool.query(insert, function (err, rows) {
+            if (err) {
+                console.log(err);
+                return res.json({ success: false, message: "Unknown error" });
+            }
+            res.json({ success: true, message: "successfully added point" });
+        });
+    });
+});
 
 router.post('/:id/rating', requireAuth,
     form(field("rating").required().isInt(),
@@ -174,6 +203,42 @@ router.get('/:id/comments', requireAuth, form(field("id").required().isInt()), f
                          WHERE point_of_interest_id = ${req.params.id};`;
 
     config.pool.query(selectComment, function (err, rows) {
+        if (err) {
+            console.log(err);
+            return res.json({ success: false, message: "Unknown error" });
+        }
+        res.json({ success: true, data: rows });
+    });
+});
+
+
+router.post('/:id/photos', requireAuth, 
+    form(
+        field("id").required().isInt(), field("filename").required()
+    ), function(req, res) {
+        if (!req.form.isValid) {
+            return res.json({ success: false, message: req.form.errors });
+        }
+
+        var insertPhoto = `INSERT INTO poi_photos (poi_id, user_id, filename) VALUES (${req.params.id}, ${req.user.user_id}, ${config.pool.escape(req.body.filename)});`;
+
+        config.pool.query(insertPhoto, function(err, rows) {
+            if (err) {
+                console.log(err);
+                return res.json({ success: false, message: "Unknown error" });
+            }
+            res.json({ success: true, message: "successfully registered image" });
+        });
+});
+
+router.get('/:id/photos', requireAuth, form(field("id").required().isInt()), function(req, res) {
+    if (!req.form.isValid) {
+        return res.json({ success: false, message: req.form.errors });
+    }
+
+    var getPhotos = `SELECT * FROM poi_photos WHERE poi_id = ${req.params.id};`;
+
+    config.pool.query(getPhotos, function(err, rows) {
         if (err) {
             console.log(err);
             return res.json({ success: false, message: "Unknown error" });

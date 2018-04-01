@@ -327,13 +327,17 @@ function sendResetEmail(code, email) {
         text: 'Hello. This is where you reset your password.\n' + code
     };
     
-    config.transporter.sendMail(mailOptions, function(error, info) {
-        if (error) {
-            console.log(error);
-        } else {
-          console.log('Email sent: ' + info.response);
-        }
-    });
+    try {
+        config.transporter.sendMail(mailOptions, function(error, info) {
+            if (error) {
+                console.log(error);
+            } else {
+                console.log('Email sent: ' + info.response);
+            }
+        });
+    } catch (err) {
+        console.log(err);
+    }
 }
 
 
