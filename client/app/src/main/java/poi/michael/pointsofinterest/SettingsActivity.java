@@ -52,7 +52,7 @@ public class SettingsActivity extends AppCompatActivity {
         Button pictureButton = (Button) findViewById(R.id.settings_picture);
         pictureButton.setOnClickListener(mUploadPictureListener);
 
-        AWSMobileClient.getInstance().initialize(this).execute();
+        //AWSMobileClient.getInstance().initialize(this).execute();
     }
 
     private View.OnClickListener mSaveSettingsListener = new View.OnClickListener()
