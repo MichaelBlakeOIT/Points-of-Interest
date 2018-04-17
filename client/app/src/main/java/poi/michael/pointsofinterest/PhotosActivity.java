@@ -1,6 +1,7 @@
 package poi.michael.pointsofinterest;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -128,9 +129,6 @@ public class PhotosActivity extends Activity {
     public void uploadData(String path, final String filename) {
         File image = new File(path);
 
-        // Initialize AWSMobileClient if not initialized upon the app startup.
-        //AWSMobileClient.getInstance().initialize(this).execute();
-
         TransferUtility transferUtility =
                 TransferUtility.builder()
                         .defaultBucket("points-of-interest")
@@ -203,14 +201,12 @@ public class PhotosActivity extends Activity {
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
-                            //Log.d("Response", response);
                         }
                     },
                     new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
-                            // error
-                            //Log.d("Error.Response", error.toString());
+                            Log.d("Error.Response", error.toString());
                         }
                     }
             ) {
@@ -256,21 +252,22 @@ public class PhotosActivity extends Activity {
                                 JSONObject JSONResponse = new JSONObject(response);
 
                                 if (JSONResponse.getBoolean("success")) {
-                                    JSONArray photos = JSONResponse.getJSONArray("data");
-                                    new GetImagesTask().execute(photos);
+                                    JSONArray photos;
+                                    photos = JSONResponse.getJSONArray("data");
+                                    if (photos.length() > 0) {
+                                        new GetImagesTask().execute(photos);
+                                    }
                                 }
                             }
                             catch (JSONException e) {
                                 e.printStackTrace();
                             }
-                            //Log.d("Response", response);
                         }
                     },
                     new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
-                            // error
-                            //Log.d("Error.Response", error.toString());
+                            Log.d("Error.Response", error.toString());
                         }
                     }
             ) {
@@ -287,15 +284,31 @@ public class PhotosActivity extends Activity {
             volleySingleton.getInstance(mContext).getRequestQueue().add(ratingRequest);
             return true;
         }
+
+        @Override
+        protected void onPostExecute(Boolean x) {
+
+        }
     }
 
     private class GetImagesTask extends AsyncTask<JSONArray, Void, Boolean> {
 
+        ProgressDialog progDialog;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            progDialog = new ProgressDialog(PhotosActivity.this);
+            progDialog.setMessage("Loading...");
+            progDialog.setIndeterminate(false);
+            progDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            progDialog.setCancelable(true);
+            progDialog.show();
+        }
+
         @Override
         protected Boolean doInBackground(JSONArray... photos_json) {
             JSONObject photo;
-            //ArrayList<ImageView> ivs = new ArrayList<>();
-            //ArrayList<Bitmap> bms = new ArrayList<>();
 
             for(int i = 0; i < photos_json[0].length(); i++) {
                 try {
@@ -312,10 +325,8 @@ public class PhotosActivity extends Activity {
 
         @Override
         protected void onPostExecute(Boolean x) {
-            /*for(int i = 0; i < images.size(); i++) {
-                photos.add(images.get(i));
-            }*/
             adapter.notifyDataSetChanged();
+            progDialog.dismiss();
         }
     }
 
