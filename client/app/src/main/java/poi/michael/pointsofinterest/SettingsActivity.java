@@ -1,5 +1,6 @@
 package poi.michael.pointsofinterest;
 
+import android.app.Activity;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
@@ -37,7 +38,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.amazonaws.mobileconnectors.s3.transferutility.*;
-public class SettingsActivity extends AppCompatActivity {
+public class SettingsActivity extends Activity {
 
     public static final int RESULT_LOAD_IMG = 0;
 

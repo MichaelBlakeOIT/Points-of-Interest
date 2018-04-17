@@ -1,5 +1,6 @@
 package poi.michael.pointsofinterest;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -41,7 +42,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ProfileActivity extends AppCompatActivity {
+public class ProfileActivity extends Activity {
     private String mProfileUsername;
     private String mLoggedInUsername;
     private String mBio;
@@ -53,7 +54,10 @@ public class ProfileActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Intent intentExtras = getIntent();
-        mProfileUsername = intentExtras.getStringExtra("username").replaceAll("\\s+","");
+        mProfileUsername = intentExtras.getStringExtra("username");
+        if (mProfileUsername != null) {
+            mProfileUsername = mProfileUsername.replaceAll("\\s+","");
+        }
         mLinearLayoutManager = new LinearLayoutManager(this);
 
         SharedPreferences sharedPref = getSharedPreferences(getString(R.string.user_token), Context.MODE_PRIVATE);
@@ -225,7 +229,7 @@ public class ProfileActivity extends AppCompatActivity {
                                         String title = POI.getString("title");
                                         String description = POI.getString("description");
                                         int poiId = POI.getInt("pio_id");
-                                        list_locations.add(new NamedLocation(title, new LatLng(lat, _long)));
+                                        list_locations.add(new NamedLocation(title, new LatLng(lat, _long), poiId));
                                     }
 
                                     mRecyclerView = (RecyclerView) findViewById(R.id.profile_poi_feed);

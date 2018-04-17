@@ -24,7 +24,7 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
-public class addPoiActivity extends AppCompatActivity {
+public class addPoiActivity extends Activity {
 
     private double mLatitude = 0;
     private double mLongitude = 0;

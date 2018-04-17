@@ -40,14 +40,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class FeedActivity extends AppCompatActivity {
+public class FeedActivity extends Activity {
     private RecyclerView mRecyclerView;
 
     private LinearLayoutManager mLinearLayoutManager;
 
     private List<NamedLocation> list_locations = new ArrayList<>();
-
-    private int mPoiId = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -136,7 +134,7 @@ public class FeedActivity extends AppCompatActivity {
                 map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
             }
 
-            private void bindView(int pos) {
+            private void bindView(final int pos) {
                 NamedLocation item = namedLocations.get(pos);
                 // Store a reference of the ViewHolder object in the layout.
                 layout.setTag(this);
@@ -148,21 +146,17 @@ public class FeedActivity extends AppCompatActivity {
                 comments.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        if(mPoiId != -1) {
-                            Intent commentsIntent = new Intent(FeedActivity.this, CommentActivity.class);
-                            commentsIntent.putExtra("poi_id", mPoiId);
-                            FeedActivity.this.startActivity(commentsIntent);
-                        }
+                        Intent commentsIntent = new Intent(FeedActivity.this, CommentActivity.class);
+                        commentsIntent.putExtra("poi_id", namedLocations.get(pos).poiId);
+                        FeedActivity.this.startActivity(commentsIntent);
                     }
                 });
                 photos.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        if(mPoiId != -1) {
-                            Intent photosIntent = new Intent(FeedActivity.this, PhotosActivity.class);
-                            photosIntent.putExtra("poi_id", mPoiId);
-                            FeedActivity.this.startActivity(photosIntent);
-                        }
+                        Intent photosIntent = new Intent(FeedActivity.this, PhotosActivity.class);
+                        photosIntent.putExtra("poi_id", namedLocations.get(pos).poiId);
+                        FeedActivity.this.startActivity(photosIntent);
                     }
                 });
             }
@@ -195,10 +189,10 @@ public class FeedActivity extends AppCompatActivity {
                                     String title = POI.getString("title");
                                     String description = POI.getString("description");
                                     int userId = POI.getInt("user_id");
-                                    mPoiId = POI.getInt("pio_id");
+                                    int poi_id = POI.getInt("pio_id");
                                     String username = POI.getString("username");
 
-                                    list_locations.add(new NamedLocation(title, new LatLng(lat, _long)));
+                                    list_locations.add(new NamedLocation(title, new LatLng(lat, _long), poi_id));
                                 }
 
                                 mRecyclerView = (RecyclerView) findViewById(R.id.following_feed);

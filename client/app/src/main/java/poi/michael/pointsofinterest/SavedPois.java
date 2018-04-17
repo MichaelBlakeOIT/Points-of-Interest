@@ -1,5 +1,6 @@
 package poi.michael.pointsofinterest;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -43,7 +44,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class SavedPois extends AppCompatActivity {
+public class SavedPois extends Activity {
     private RecyclerView mRecyclerView;
 
     private LinearLayoutManager mLinearLayoutManager;
