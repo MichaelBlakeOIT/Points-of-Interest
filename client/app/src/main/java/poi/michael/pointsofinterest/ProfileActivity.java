@@ -280,19 +280,23 @@ public class ProfileActivity extends Activity {
         protected Bitmap doInBackground(String... urls) {
             String urldisplay = urls[0];
             Bitmap mIcon11 = null;
+            Bitmap resized = null;
             try {
                 InputStream in = new java.net.URL(urldisplay).openStream();
                 mIcon11 = BitmapFactory.decodeStream(in);
+                resized = ImageTools.cropToSquare(mIcon11);
             } catch (Exception e) {
                 Log.e("Error", e.getMessage());
                 e.printStackTrace();
             }
-            return mIcon11;
+            return resized;
         }
 
         protected void onPostExecute(Bitmap result) {
             bmImage.setImageBitmap(result);
         }
+
+
     }
 
     private class FollowUserTask extends AsyncTask<Void, Void, Boolean> {

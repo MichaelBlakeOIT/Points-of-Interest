@@ -154,7 +154,7 @@ public class SettingsActivity extends Activity {
         }
     }
 
-    public void uploadData(File image) {
+    /*public void uploadData(File image) {
 
         SharedPreferences sharedPref = getSharedPreferences(getString(R.string.user_token), Context.MODE_PRIVATE);
         String username = sharedPref.getString("username", "");
@@ -203,7 +203,7 @@ public class SettingsActivity extends Activity {
         if (TransferState.COMPLETED == uploadObserver.getState()) {
             // Handle a completed upload.
         }
-    }
+    }*/
 
     private String getPath(Uri uri) throws URISyntaxException {
         final boolean needToCheckUri = Build.VERSION.SDK_INT >= 19;
@@ -283,9 +283,12 @@ public class SettingsActivity extends Activity {
 
         if (resultCode == RESULT_OK) {
             try {
+                SharedPreferences sharedPref = getSharedPreferences(getString(R.string.user_token), Context.MODE_PRIVATE);
+                String username = sharedPref.getString("username", "");
                 Uri uri = data.getData();
                 String path = getPath(uri);
-                uploadData(new File(path));
+                ImageTools.uploadData(new File(path), "profile_photos/" + username + ".jpg", getApplicationContext());
+                //uploadData(new File(path));
             } catch (URISyntaxException e) {
                 Toast.makeText(this,
                         "Unable to get the file from the given URI.  See error log for details",

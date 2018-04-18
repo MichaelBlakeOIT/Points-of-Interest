@@ -9,10 +9,10 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,12 +22,6 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.mobileconnectors.s3.transferutility.TransferListener;
-import com.amazonaws.mobileconnectors.s3.transferutility.TransferObserver;
-import com.amazonaws.mobileconnectors.s3.transferutility.TransferState;
-import com.amazonaws.mobileconnectors.s3.transferutility.TransferUtility;
-import com.amazonaws.services.s3.AmazonS3Client;
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -38,26 +32,24 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.InputStream;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class PhotosActivity extends Activity {
 
     int mId;
     static final int REQUEST_IMAGE_CAPTURE = 1;
-    static final int REQUEST_TAKE_PHOTO = 1;
     private String mCurrentPhotoPath;
+    private File photoFile;
     private String mImageFileName;
     ImageAdapter adapter;
     private ArrayList<Bitmap> photos;
-    //private ArrayList<ImageView> photos;
     private ListView mLv;
 
     @Override
@@ -72,9 +64,6 @@ public class PhotosActivity extends Activity {
         photos = new ArrayList<>();
         adapter = new ImageAdapter(this, photos);
         mLv.setAdapter(adapter);
-        //adapter = new SimpleAdapter(getBaseContext(), , R.layout.listview_layout, from, to);
-        //adapter = new ArrayAdapter<>(this, R.layout.single_image, photos);
-        //setListAdapter(adapter);
         new GetPhotosTask().execute();
     }
 
@@ -83,11 +72,12 @@ public class PhotosActivity extends Activity {
         // Ensure that there's a camera activity to handle the intent
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
             // Create the File where the photo should go
-            File photoFile = null;
+            //File photoFile = null;
             try {
                 photoFile = createImageFile();
+
             } catch (IOException ex) {
-                // Error occurred while creating the File
+                Log.e("PhotosActivity", ex.toString());
             }
             // Continue only if the File was successfully created
             if (photoFile != null) {
@@ -95,7 +85,7 @@ public class PhotosActivity extends Activity {
                         "com.example.android.fileprovider",
                         photoFile);
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-                startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
+                startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
             }
         }
     }
@@ -103,17 +93,22 @@ public class PhotosActivity extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            //Bundle extras = data.getExtras();
-            //Bitmap imageBitmap = (Bitmap) extras.get("data");
-            //mImageView.setImageBitmap(imageBitmap);
-            uploadData(mCurrentPhotoPath, mImageFileName);
+            //URI photo = (URI) data.getExtras().get("data");
+            if (photoFile != null) {
+                String filename = UUID.randomUUID().toString();
+                ImageTools.uploadData(photoFile, "pois/" + filename, getApplicationContext());
+                new RegisterPhotoTask(filename).execute();
+                new GetPhotosTask().execute();
+            }
+            //uploadData(mCurrentPhotoPath, mImageFileName);
         }
     }
 
     private File createImageFile() throws IOException {
         // Create an image file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        mImageFileName = "JPEG_" + timeStamp + "_";
+        //String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        mImageFileName = "JPEG_" + UUID.randomUUID().toString() + "_";
+        //mImageFileName = "JPEG_" + timeStamp + "_";
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         File image = File.createTempFile(
                 mImageFileName,  /* prefix */
@@ -124,54 +119,6 @@ public class PhotosActivity extends Activity {
         // Save a file: path for use with ACTION_VIEW intents
         mCurrentPhotoPath = image.getAbsolutePath();
         return image;
-    }
-
-    public void uploadData(String path, final String filename) {
-        File image = new File(path);
-
-        TransferUtility transferUtility =
-                TransferUtility.builder()
-                        .defaultBucket("points-of-interest")
-                        .context(getApplicationContext())
-                        .s3Client(new AmazonS3Client( new BasicAWSCredentials( getResources().getString(R.string.aws_key),getResources().getString(R.string.aws_secret)) ))
-                        .build();
-
-        TransferObserver uploadObserver =
-                transferUtility.upload(
-                        "pois/" + filename,
-                        image);
-
-        uploadObserver.setTransferListener(new TransferListener() {
-
-            @Override
-            public void onStateChanged(int id, TransferState state) {
-                if (TransferState.COMPLETED == state) {
-                    Toast.makeText(getApplicationContext(), "Success",Toast.LENGTH_LONG).show();
-                    new RegisterPhotoTask(filename).execute();
-                    new GetPhotosTask().execute();
-                }
-            }
-
-            @Override
-            public void onProgressChanged(int id, long bytesCurrent, long bytesTotal) {
-                float percentDonef = ((float)bytesCurrent/(float)bytesTotal) * 100;
-                int percentDone = (int)percentDonef;
-
-                Log.d("MainActivity", "   ID:" + id + "   bytesCurrent: " + bytesCurrent + "   bytesTotal: " + bytesTotal + " " + percentDone + "%");
-            }
-
-            @Override
-            public void onError(int id, Exception ex) {
-                Toast.makeText(getApplicationContext(), "An error occurred",Toast.LENGTH_LONG).show();
-            }
-
-        });
-
-        // If your upload does not trigger the onStateChanged method inside your
-        // TransferListener, you can directly check the transfer state as shown here.
-        if (TransferState.COMPLETED == uploadObserver.getState()) {
-            // Handle a completed upload.
-        }
     }
 
     private class RegisterPhotoTask extends AsyncTask<Void, Void, Boolean> {
@@ -192,7 +139,6 @@ public class PhotosActivity extends Activity {
                     new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
-                            // response
                             try {
                                 JSONObject JSONResponse = new JSONObject(response);
                                 if (JSONResponse.getBoolean("success")) {
@@ -315,7 +261,9 @@ public class PhotosActivity extends Activity {
                     photo = photos_json[0].getJSONObject(i);
                     String name = photo.getString("filename");
                     InputStream in = new java.net.URL("https://s3.us-east-2.amazonaws.com/points-of-interest/pois/" + name).openStream();
-                    photos.add(BitmapFactory.decodeStream(in));
+                    BitmapFactory.Options options = new BitmapFactory.Options();
+                    options.inSampleSize = 4;
+                    photos.add(BitmapFactory.decodeStream(in, null, options));
                 } catch (JSONException | IOException e) {
                     e.printStackTrace();
                 }
