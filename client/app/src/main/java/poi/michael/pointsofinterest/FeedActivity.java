@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -127,11 +128,13 @@ public class FeedActivity extends Activity {
                 if (data == null) return;
 
                 // Add a marker for this item and set the camera
-                map.moveCamera(CameraUpdateFactory.newLatLngZoom(data.location, 13f));
-                map.addMarker(new MarkerOptions().position(data.location));
+                map.moveCamera(CameraUpdateFactory.newLatLngZoom(data.getLocation(), 13f));
+                map.addMarker(new MarkerOptions().position(data.getLocation()));
 
                 // Set the map type back to normal.
                 map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+
+                mapView.onResume();
             }
 
             private void bindView(final int pos) {
@@ -142,12 +145,12 @@ public class FeedActivity extends Activity {
                 // coordinate of a location, when setting the map location.
                 mapView.setTag(item);
                 setMapLocation();
-                title.setText(item.name);
+                title.setText(item.getName());
                 comments.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         Intent commentsIntent = new Intent(FeedActivity.this, CommentActivity.class);
-                        commentsIntent.putExtra("poi_id", namedLocations.get(pos).poiId);
+                        commentsIntent.putExtra("poi_id", namedLocations.get(pos).getPoiId());
                         FeedActivity.this.startActivity(commentsIntent);
                     }
                 });
@@ -155,7 +158,7 @@ public class FeedActivity extends Activity {
                     @Override
                     public void onClick(View view) {
                         Intent photosIntent = new Intent(FeedActivity.this, PhotosActivity.class);
-                        photosIntent.putExtra("poi_id", namedLocations.get(pos).poiId);
+                        photosIntent.putExtra("poi_id", namedLocations.get(pos).getPoiId());
                         FeedActivity.this.startActivity(photosIntent);
                     }
                 });
@@ -210,7 +213,7 @@ public class FeedActivity extends Activity {
                         @Override
                         public void onErrorResponse(VolleyError error) {
                             // error
-                            //Log.d("Error.Response", error.toString());
+                            Log.d("Error.Response", error.toString());
                         }
                     }
             ) {

@@ -52,8 +52,6 @@ public class SettingsActivity extends Activity {
 
         Button pictureButton = (Button) findViewById(R.id.settings_picture);
         pictureButton.setOnClickListener(mUploadPictureListener);
-
-        //AWSMobileClient.getInstance().initialize(this).execute();
     }
 
     private View.OnClickListener mSaveSettingsListener = new View.OnClickListener()
@@ -230,10 +228,7 @@ public class SettingsActivity extends Activity {
                 ImageTools.uploadData(new File(path), "profile_photos/" + username + ".jpg", getApplicationContext());
                 //uploadData(new File(path));
             } catch (URISyntaxException e) {
-                Toast.makeText(this,
-                        "Unable to get the file from the given URI.  See error log for details",
-                        Toast.LENGTH_LONG).show();
-                //Log.e(TAG, "Unable to upload file from the given uri", e);
+                Log.e("SettingsActivity", "Unable to upload file from the given uri", e);
             }
         }
         else {

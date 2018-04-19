@@ -164,8 +164,8 @@ public class ProfileActivity extends Activity {
                 if (data == null) return;
 
                 // Add a marker for this item and set the camera
-                map.moveCamera(CameraUpdateFactory.newLatLngZoom(data.location, 13f));
-                map.addMarker(new MarkerOptions().position(data.location));
+                map.moveCamera(CameraUpdateFactory.newLatLngZoom(data.getLocation(), 13f));
+                map.addMarker(new MarkerOptions().position(data.getLocation()));
 
                 // Set the map type back to normal.
                 map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
@@ -179,7 +179,7 @@ public class ProfileActivity extends Activity {
                 // coordinate of a location, when setting the map location.
                 mapView.setTag(item);
                 setMapLocation();
-                title.setText(item.name);
+                title.setText(item.getName());
             }
         }
     }

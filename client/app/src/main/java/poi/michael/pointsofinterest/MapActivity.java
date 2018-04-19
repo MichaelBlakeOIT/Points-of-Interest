@@ -310,20 +310,23 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                                     Float rating = BigDecimal.valueOf(POI.getDouble("rating")).floatValue();
 
                                     //MarkerInfo info = new MarkerInfo(lat, _long, title, description, userId, poiId, username, (float)5);
-                                    MarkerInfo info = new MarkerInfo(lat, _long, title, description, userId, poiId, username, rating);
+                                    //MarkerInfo info = new MarkerInfo(lat, _long, title, description, userId, poiId, username, rating);
+                                    NamedLocation poi = new NamedLocation(title, new LatLng(lat, _long), poiId, userId, rating, description, username);
 
-                                    Marker marker = mMap.addMarker(new MarkerOptions().position(new LatLng(lat, _long)).title(title));
+                                    //Marker marker = mMap.addMarker(new MarkerOptions().position(new LatLng(lat, _long)).title(title));
+                                    Marker marker = mMap.addMarker(new MarkerOptions().position(poi.getLocation()).title(poi.getName()));
 
-                                    marker.setTag(info);
+                                    marker.setTag(poi);
                                 }
 
                                 mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
                                     @Override
                                     public boolean onMarkerClick(Marker marker) {
-                                        MarkerInfo info = (MarkerInfo)marker.getTag();
+                                        //MarkerInfo info = (MarkerInfo)marker.getTag();
+                                        NamedLocation info = (NamedLocation) marker.getTag();
                                         Intent POIActivityIntent = new Intent(MapActivity.this, POIActivity.class);
 
-                                        POIActivityIntent.putExtra("title", info.getTitle());
+                                        POIActivityIntent.putExtra("title", info.getName());
                                         POIActivityIntent.putExtra("description", info.getDescription());
                                         POIActivityIntent.putExtra("username", info.getUsername());
                                         POIActivityIntent.putExtra("id", info.getPoiId());
@@ -372,7 +375,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
         }
 
-        class MarkerInfo {
+        /*class MarkerInfo {
             private double mLat;
             private double mLong;
             private String mTitle;
@@ -418,13 +421,13 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             }
 
             public Float getRating() { return mRating; }
-        }
+        }*/
     }
 
     private void logout() {
         SharedPreferences preferences = getSharedPreferences(getString(R.string.user_token), 0);
-        preferences.edit().remove("token").commit();
-        preferences.edit().remove("username").commit();
+        preferences.edit().remove("token").apply();
+        preferences.edit().remove("username").apply();
 
         Intent LoginActivityIntent = new Intent(MapActivity.this, LoginActivity.class);
         MapActivity.this.startActivity(LoginActivityIntent);

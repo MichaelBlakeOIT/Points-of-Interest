@@ -135,7 +135,7 @@ router.get('/', requireAuth, function (req, res) {
             return;
         }
         if (rows.length) {
-            res.json({ success: true, message: rows[0] });
+            res.json({ success: true, message: { user: rows[0] }});
             return;
         }
     });
