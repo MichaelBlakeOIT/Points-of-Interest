@@ -190,7 +190,7 @@ public class ProfileActivity extends Activity {
             String url = getResources().getString(R.string.base_url) + "/users/user/";
 
             //viewing another profile or your own
-            url = (mProfileUsername != null) ? (url += mProfileUsername) : (url += mLoggedInUsername);
+            url = (mProfileUsername != null) ? (url + mProfileUsername) : (url + mLoggedInUsername);
 
             mContext = getApplicationContext();
 
@@ -198,7 +198,6 @@ public class ProfileActivity extends Activity {
                     new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
-                            // response
                             try {
                                 JSONObject JSONResponse = new JSONObject(response);
                                 if (JSONResponse.getBoolean("success")) {
@@ -217,7 +216,9 @@ public class ProfileActivity extends Activity {
                                             .execute("https://s3.us-east-2.amazonaws.com/points-of-interest/profile_photos/" + mProfileUsername.toLowerCase() + ".jpg");
 
                                     username.setText(mProfileUsername);
-                                    bio.setText(mBio);
+                                    if(!mBio.matches("null")) {
+                                        bio.setText(mBio);
+                                    }
                                     if(mFollowing == 1) {
                                         mFollowButton.setText("Unfollow User");
                                     }
