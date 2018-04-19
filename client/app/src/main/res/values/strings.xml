@@ -113,4 +113,8 @@
     <string name="forgot_password_question">Forgot password?</string>
     <string name="reset_password">Reset it.</string>
     <string name="login">Login</string>
+    <string name="poi_name_hint">POI Name</string>
+    <string name="poi_description_hint">Description</string>
+    <string name="add_poi">Add POI</string>
+    <string name="new_poi">New POI</string>
 </resources>

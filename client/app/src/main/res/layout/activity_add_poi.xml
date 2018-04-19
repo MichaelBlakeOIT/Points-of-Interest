@@ -7,17 +7,16 @@
     tools:context="poi.michael.pointsofinterest.addPoiActivity">
 
     <LinearLayout
-        android:layout_width="368dp"
-        android:layout_height="551dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:orientation="vertical"
-        tools:layout_editor_absoluteX="8dp"
-        tools:layout_editor_absoluteY="8dp">
+        android:layout_margin="15dp">
 
         <TextView
             android:id="@+id/textView2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="New POI"
+            android:text="@string/new_poi"
             android:textAlignment="center"
             android:textAppearance="@style/TextAppearance.AppCompat.Title" />
 
@@ -27,18 +26,22 @@
             android:layout_height="wrap_content"
             android:ems="10"
             android:inputType="textPersonName"
-            android:text="Name" />
+            android:backgroundTint="@android:color/holo_blue_bright"
+            android:hint="@string/poi_name_hint" />
 
-        <MultiAutoCompleteTextView
+        <EditText
             android:id="@+id/PoiDescription"
+            android:inputType="textMultiLine"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Description" />
+            android:backgroundTint="@android:color/holo_blue_bright"
+            android:hint="@string/poi_description_hint" />
 
         <Button
             android:id="@+id/AddPoiButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Add POI" />
+            android:background="@android:color/holo_blue_dark"
+            android:text="@string/add_poi" />
     </LinearLayout>
 </android.support.constraint.ConstraintLayout>

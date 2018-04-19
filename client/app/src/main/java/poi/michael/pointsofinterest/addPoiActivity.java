@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -87,14 +88,12 @@ public class addPoiActivity extends Activity {
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
-                            //Log.d("Response", response);
                         }
                     },
                     new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
-                            // error
-                            //Log.d("Error.Response", error.toString());
+                            Log.d("Error.Response", error.toString());
                         }
                     }
             ) {
@@ -126,7 +125,6 @@ public class addPoiActivity extends Activity {
 
         @Override
         protected void onPostExecute(final Boolean success) {
-            MapActivity addPoint = new MapActivity();
             Intent sendPointInfo = new Intent();
             sendPointInfo.putExtra("latitude", mLat);
             sendPointInfo.putExtra("longitude", mLong);
