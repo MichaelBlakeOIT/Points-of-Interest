@@ -116,7 +116,6 @@ public class SettingsActivity extends Activity {
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
-                            //Log.d("Response", response);
                         }
                     },
                     new Response.ErrorListener()
@@ -153,57 +152,6 @@ public class SettingsActivity extends Activity {
             return true;
         }
     }
-
-    /*public void uploadData(File image) {
-
-        SharedPreferences sharedPref = getSharedPreferences(getString(R.string.user_token), Context.MODE_PRIVATE);
-        String username = sharedPref.getString("username", "");
-
-        // Initialize AWSMobileClient if not initialized upon the app startup.
-        //AWSMobileClient.getInstance().initialize(this).execute();
-
-        TransferUtility transferUtility =
-                TransferUtility.builder()
-                        .defaultBucket("points-of-interest")
-                        .context(getApplicationContext())
-                        .s3Client(new AmazonS3Client( new BasicAWSCredentials( getResources().getString(R.string.aws_key),getResources().getString(R.string.aws_secret)) ))
-                        .build();
-
-        TransferObserver uploadObserver =
-                transferUtility.upload(
-                        "profile_photos/" + username + ".jpg",
-                        image);
-
-        uploadObserver.setTransferListener(new TransferListener() {
-
-            @Override
-            public void onStateChanged(int id, TransferState state) {
-                if (TransferState.COMPLETED == state) {
-                    Toast.makeText(getApplicationContext(), "Success",Toast.LENGTH_LONG).show();
-                }
-            }
-
-            @Override
-            public void onProgressChanged(int id, long bytesCurrent, long bytesTotal) {
-                float percentDonef = ((float)bytesCurrent/(float)bytesTotal) * 100;
-                int percentDone = (int)percentDonef;
-
-                Log.d("MainActivity", "   ID:" + id + "   bytesCurrent: " + bytesCurrent + "   bytesTotal: " + bytesTotal + " " + percentDone + "%");
-            }
-
-            @Override
-            public void onError(int id, Exception ex) {
-                Toast.makeText(getApplicationContext(), "An error occurred",Toast.LENGTH_LONG).show();
-            }
-
-        });
-
-        // If your upload does not trigger the onStateChanged method inside your
-        // TransferListener, you can directly check the transfer state as shown here.
-        if (TransferState.COMPLETED == uploadObserver.getState()) {
-            // Handle a completed upload.
-        }
-    }*/
 
     private String getPath(Uri uri) throws URISyntaxException {
         final boolean needToCheckUri = Build.VERSION.SDK_INT >= 19;
@@ -272,14 +220,6 @@ public class SettingsActivity extends Activity {
     @Override
     protected void onActivityResult(int reqCode, int resultCode, Intent data) {
         super.onActivityResult(reqCode, resultCode, data);
-
-        /*if (resultCode == RESULT_OK) {
-            Uri selectedImageUri = data.getData();
-            uploadData(new File(selectedImageUri.getPath()));
-        }
-        else {
-            Toast.makeText(getApplicationContext(), "You haven't picked Image",Toast.LENGTH_LONG).show();
-        }*/
 
         if (resultCode == RESULT_OK) {
             try {

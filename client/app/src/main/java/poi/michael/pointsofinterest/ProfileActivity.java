@@ -189,13 +189,11 @@ public class ProfileActivity extends Activity {
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            //Base URL. If username ends up NULL, this url will return your own profile info
-            String url = getResources().getString(R.string.base_url) + "/users";
+            String url = getResources().getString(R.string.base_url) + "/users/user/";
 
-            //If you're viewing someone's profile other than your own
-            if (mProfileUsername != null && !mProfileUsername.equals(mLoggedInUsername)) {
-                url += "/user/" + mProfileUsername;
-            }
+            //viewing another profile or your own
+            url = (mProfileUsername != null) ? (url += mProfileUsername) : (url += mLoggedInUsername);
+
             mContext = getApplicationContext();
 
             StringRequest postRequest = new StringRequest(Request.Method.GET, url,

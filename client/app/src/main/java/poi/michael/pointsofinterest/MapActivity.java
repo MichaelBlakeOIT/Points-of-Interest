@@ -424,6 +424,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private void logout() {
         SharedPreferences preferences = getSharedPreferences(getString(R.string.user_token), 0);
         preferences.edit().remove("token").commit();
+        preferences.edit().remove("username").commit();
 
         Intent LoginActivityIntent = new Intent(MapActivity.this, LoginActivity.class);
         MapActivity.this.startActivity(LoginActivityIntent);
