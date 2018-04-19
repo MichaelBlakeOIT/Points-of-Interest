@@ -167,6 +167,8 @@ public class ProfileActivity extends Activity {
 
                 // Set the map type back to normal.
                 map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+
+                mapView.onResume();
             }
 
             private void bindView(int pos) {
