@@ -25,7 +25,7 @@
         android:layout_marginStart="16dp"
         android:includeFontPadding="false"
         android:layout_marginTop="16dp"
-        android:text="Loading..."
+        android:text="@string/loading"
         android:textSize="30sp"
         app:layout_constraintBottom_toTopOf="@+id/profile_bio"
         app:layout_constraintEnd_toEndOf="parent"

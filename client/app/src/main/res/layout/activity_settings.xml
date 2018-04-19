@@ -14,6 +14,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="4dp"
         android:ems="10"
+        android:backgroundTint="@android:color/holo_blue_bright"
         android:inputType="textMultiLine"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
@@ -35,10 +36,11 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
+        android:backgroundTint="@android:color/holo_blue_bright"
         android:layout_marginStart="16dp"
         android:layout_marginTop="12dp"
         android:ems="10"
-        android:hint="Unchanged"
+        android:hint="@string/unchanged_hint"
         android:inputType="textPassword"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
@@ -51,7 +53,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="28dp"
-        android:text="Password"
+        android:text="@string/password"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/bio_text" />
 
@@ -63,7 +65,8 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="12dp"
         android:ems="10"
-        android:hint="Unchanged"
+        android:backgroundTint="@android:color/holo_blue_bright"
+        android:hint="@string/unchanged_hint"
         android:inputType="textPassword"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
@@ -76,7 +79,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="24dp"
-        android:text="Repeat Password"
+        android:text="@string/repeat_password"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/change_password_text" />
 
@@ -87,7 +90,8 @@
         android:layout_marginBottom="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginStart="16dp"
-        android:text="Save"
+        android:background="@android:color/holo_blue_dark"
+        android:text="@string/save"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
@@ -99,7 +103,7 @@
         android:layout_marginEnd="16dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
-        android:text="Choose Profile Picture"
+        android:text="@string/choose_profile_picture"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/change_password_repeat_text" />
