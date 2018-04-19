@@ -50,8 +50,6 @@ public class LoginActivity extends Activity {
         mSignInButton.setOnClickListener(mSignInButtonListener);
         RegisterTextView.setOnClickListener(mRegisterSelectListener);
 
-        //AWSMobileClient.getInstance().initialize(this).execute();
-
         checkToken();
     }
 

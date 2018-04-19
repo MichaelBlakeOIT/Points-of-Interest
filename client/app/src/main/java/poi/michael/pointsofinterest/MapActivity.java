@@ -374,54 +374,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         protected void onCancelled() {
 
         }
-
-        /*class MarkerInfo {
-            private double mLat;
-            private double mLong;
-            private String mTitle;
-            private String mDescription;
-            private int mUserId;
-            private int mPoiId;
-            private String mUsername;
-            private Float mRating;
-
-            MarkerInfo(double lat, double _long, String title, String description, int userId, int poiId, String username, Float rating) {
-                mLat = lat;
-                mLong = _long;
-                mTitle = title;
-                mDescription = description;
-                mUserId = userId;
-                mPoiId = poiId;
-                mUsername = username;
-                mRating = rating;
-            }
-
-            public LatLng getLocation() {
-                return new LatLng(mLat, mLong);
-            }
-
-            public String getTitle() {
-                return mTitle;
-            }
-
-            public String getDescription() {
-                return mDescription;
-            }
-
-            public int getUserId() {
-                return mUserId;
-            }
-
-            public int getPoiId() {
-                return mPoiId;
-            }
-
-            public String getUsername() {
-                return mUsername;
-            }
-
-            public Float getRating() { return mRating; }
-        }*/
     }
 
     private void logout() {

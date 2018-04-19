@@ -5,9 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -23,13 +21,6 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapView;
-import com.google.android.gms.maps.MapsInitializer;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -48,6 +39,7 @@ public class CommentActivity extends Activity {
     private List<Comment> list_comments = new ArrayList<>();
     private int mPoiId;
     private EditText mComment;
+    private CommentAdapter mCommentAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,11 +98,7 @@ public class CommentActivity extends Activity {
 
             private void bindView(int pos) {
                 Comment item = comments.get(pos);
-                // Store a reference of the ViewHolder object in the layout.
                 layout.setTag(this);
-                // Store a reference to the item in the mapView's tag. We use it to get the
-                // coordinate of a location, when setting the map location.
-
                 username.setText(item.getUsername());
                 text.setText(item.getComment());
             }
@@ -130,7 +118,6 @@ public class CommentActivity extends Activity {
                     new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
-                            // response
                             try {
                                 JSONObject JSONResponse = new JSONObject(response);
 
@@ -146,12 +133,12 @@ public class CommentActivity extends Activity {
 
                                     list_comments.add(new Comment(commentText, userId, poiId, commentId, username));
                                 }
+                                mCommentAdapter = new CommentAdapter(list_comments);
 
                                 mRecyclerView = (RecyclerView) findViewById(R.id.comments_recycler_view);
                                 mRecyclerView.setHasFixedSize(true);
                                 mRecyclerView.setLayoutManager(mLinearLayoutManager);
-                                mRecyclerView.setAdapter(new CommentAdapter(list_comments));
-                                //mRecyclerView.setRecyclerListener(mRecycleListener);
+                                mRecyclerView.setAdapter(mCommentAdapter);
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
@@ -181,10 +168,10 @@ public class CommentActivity extends Activity {
 
     private class CreateCommentTask extends AsyncTask<Void, Void, Boolean> {
         private Context mContext;
-        private String mComment;
+        private String mCommentText;
 
         CreateCommentTask(String comment) {
-            mComment = comment;
+            mCommentText = comment;
         }
 
         @Override
@@ -201,7 +188,12 @@ public class CommentActivity extends Activity {
                             try {
                                 JSONObject JSONResponse = new JSONObject(response);
                                 if (JSONResponse.getBoolean("success")) {
-                                    Toast.makeText(getApplicationContext(), "Successfully added comment", Toast.LENGTH_SHORT).show();
+                                    //Toast.makeText(getApplicationContext(), "Successfully added comment", Toast.LENGTH_SHORT).show();
+                                    SharedPreferences sharedPref = getSharedPreferences(getString(R.string.user_token), Context.MODE_PRIVATE);
+                                    String username =  sharedPref.getString("username", "");
+                                    list_comments.add(new Comment(mCommentText, 0, mPoiId, 0, username));
+                                    mCommentAdapter.notifyDataSetChanged();
+                                    mComment.getText().clear();
                                 } else {
                                     Toast.makeText(getApplicationContext(), "An error occurred", Toast.LENGTH_SHORT).show();
                                 }
@@ -231,7 +223,7 @@ public class CommentActivity extends Activity {
                 protected Map<String, String> getParams()
                 {
                     Map<String, String>  params = new HashMap<String, String>();
-                    params.put("comment", mComment);
+                    params.put("comment", mCommentText);
 
                     return params;
                 }

@@ -108,4 +108,9 @@
     </string>
     <string name="action_settings">Settings</string>
     <string name="add_photo">Add Photo</string>
+    <string name="comment_hint">Comment...</string>
+    <string name="submit">Submit</string>
+    <string name="forgot_password_question">Forgot password?</string>
+    <string name="reset_password">Reset it.</string>
+    <string name="login">Login</string>
 </resources>
