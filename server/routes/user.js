@@ -96,7 +96,7 @@ router.get('/user/:username', requireAuth,
             return;
         }
 
-        var user_query = `SELECT user_id, username, first_name, last_name, bio, profile_photo 
+        var user_query = `SELECT user_id, username, first_name, last_name, bio, profile_photo, (SELECT COUNT(*) FROM following WHERE follower_id = ${req.user.user_id} AND following_id = user_id) AS following
                           FROM Users 
                           WHERE Username = ${config.pool.escape(req.params.username)};`;
 

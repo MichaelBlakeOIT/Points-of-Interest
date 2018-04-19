@@ -49,14 +49,18 @@ public class ProfileActivity extends Activity {
     private RecyclerView mRecyclerView;
     private LinearLayoutManager mLinearLayoutManager;
     private List<NamedLocation> list_locations = new ArrayList<>();
+    private int mFollowing;
+    private Button mFollowButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Intent intentExtras = getIntent();
         mProfileUsername = intentExtras.getStringExtra("username");
+
         if (mProfileUsername != null) {
-            mProfileUsername = mProfileUsername.replaceAll("\\s+","");
+            //mProfileUsername = mProfileUsername.replaceAll("\\s+","");
+            mProfileUsername = mProfileUsername.trim();
         }
         mLinearLayoutManager = new LinearLayoutManager(this);
 
@@ -65,18 +69,12 @@ public class ProfileActivity extends Activity {
 
         setContentView(R.layout.activity_profile);
 
+        mFollowButton = (Button) findViewById(R.id.profile_follow);
+
         //hide follow button if viewing own profile
         if (mProfileUsername == null || mLoggedInUsername.equals(mProfileUsername)) {
-            Button followButton = (Button) findViewById(R.id.profile_follow);
-            followButton.setVisibility(View.GONE);
+            mFollowButton.setVisibility(View.GONE);
         }
-
-        /*Button button = (Button) findViewById(R.id.profile_follow);
-        button.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                new FollowUserTask().execute();
-            }
-        });*/
 
         new GetProfileDetailsTask().execute();
     }
@@ -211,6 +209,7 @@ public class ProfileActivity extends Activity {
 
                                     mBio = user.getString("bio");
                                     mProfileUsername = user.getString("username");
+                                    mFollowing = user.getInt("following");
 
                                     TextView username = (TextView) findViewById(R.id.profile_username);
                                     TextView bio = (TextView) findViewById(R.id.profile_bio);
@@ -219,13 +218,16 @@ public class ProfileActivity extends Activity {
 
                                     username.setText(mProfileUsername);
                                     bio.setText(mBio);
+                                    if(mFollowing == 1) {
+                                        mFollowButton.setText("Unfollow User");
+                                    }
 
                                     for(int i = 0; i < POIs.length(); i++) {
                                         JSONObject POI = POIs.getJSONObject(i);
                                         Double lat = POI.getDouble("lat");
                                         Double _long = POI.getDouble("long");
                                         String title = POI.getString("title");
-                                        String description = POI.getString("description");
+                                        //String description = POI.getString("description");
                                         int poiId = POI.getInt("pio_id");
                                         list_locations.add(new NamedLocation(title, new LatLng(lat, _long), poiId));
                                     }
@@ -236,20 +238,16 @@ public class ProfileActivity extends Activity {
                                     mRecyclerView.setAdapter(new MapAdapter(list_locations));
                                     mRecyclerView.setRecyclerListener(mRecycleListener);
 
-                                } else {
-                                    //I don't know what to do...
                                 }
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
-                            //Log.d("Response", response);
                         }
                     },
                     new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
-                            // error
-                            //Log.d("Error.Response", error.toString());
+                            Log.d("Error.Response", error.toString());
                         }
                     }
             ) {
@@ -302,12 +300,13 @@ public class ProfileActivity extends Activity {
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            String url = getResources().getString(R.string.base_url) + "/users/user/" + mProfileUsername + "/follow";
+            String url = getResources().getString(R.string.base_url) + "/users/user/" + mProfileUsername.trim() + "/follow";
+            int method = mFollowing == 1 ? Request.Method.DELETE : Request.Method.POST;
             Log.e("url", url);
 
             mContext = getApplicationContext();
 
-            StringRequest putRequest = new StringRequest(Request.Method.POST, url,
+            StringRequest putRequest = new StringRequest(method, url,
                     new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
@@ -315,27 +314,24 @@ public class ProfileActivity extends Activity {
                             try {
                                 JSONObject JSONResponse = new JSONObject(response);
                                 if (JSONResponse.getBoolean("success")) {
-                                    Button followButton = (Button) findViewById(R.id.profile_follow);
-                                    followButton.setText("Unfollow User");
-
-                                    final View button = findViewById(R.id.profile_follow);
-                                    button.setOnClickListener(new View.OnClickListener() {
-                                        public void onClick(View v) {
-                                            new UnfollowUserTask().execute();
-                                        }
-                                    });
+                                    if(mFollowing == 1) {
+                                        mFollowButton.setText("Follow User");
+                                        mFollowing = 0;
+                                    }
+                                    else {
+                                        mFollowButton.setText("Unfollow User");
+                                        mFollowing = 1;
+                                    }
                                 }
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
-                            //Log.d("Response", response);
                         }
                     },
                     new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
-                            // error
-                            //Log.d("Error.Response", error.toString());
+                            Log.d("Error.Response", error.toString());
                         }
                     }
             ) {
@@ -350,62 +346,6 @@ public class ProfileActivity extends Activity {
                 }
             };
             volleySingleton.getInstance(mContext).getRequestQueue().add(putRequest);
-            return true;
-        }
-    }
-
-    private class UnfollowUserTask extends AsyncTask<Void, Void, Boolean> {
-        private Context mContext;
-
-        @Override
-        protected Boolean doInBackground(Void... params) {
-            String url = getResources().getString(R.string.base_url) + "/users/user/" + mProfileUsername + "/follow";
-
-            mContext = getApplicationContext();
-
-            StringRequest deleteRequest = new StringRequest(Request.Method.DELETE, url,
-                    new Response.Listener<String>() {
-                        @Override
-                        public void onResponse(String response) {
-                            // response
-                            try {
-                                JSONObject JSONResponse = new JSONObject(response);
-                                if (JSONResponse.getBoolean("success")) {
-                                    Button followButton = (Button) findViewById(R.id.profile_follow);
-                                    followButton.setText("Follow User");
-
-                                    final View button = findViewById(R.id.profile_follow);
-                                    button.setOnClickListener(new View.OnClickListener() {
-                                        public void onClick(View v) {
-                                            new FollowUserTask().execute();
-                                        }
-                                    });
-                                }
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                            //Log.d("Response", response);
-                        }
-                    },
-                    new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            // error
-                            //Log.d("Error.Response", error.toString());
-                        }
-                    }
-            ) {
-                @Override
-                public Map<String, String> getHeaders() throws AuthFailureError {
-                    SharedPreferences sharedPref = getSharedPreferences(getString(R.string.user_token), Context.MODE_PRIVATE);
-
-                    Map<String, String> params = new HashMap<String, String>();
-                    params.put("Authorization", "Bearer " + sharedPref.getString("token", ""));
-
-                    return params;
-                }
-            };
-            volleySingleton.getInstance(mContext).getRequestQueue().add(deleteRequest);
             return true;
         }
     }
