@@ -84,7 +84,7 @@ router.post('/:id/rating', requireAuth,
 
             console.log("rows.length: ", rows.length);
 
-            if (rows.length)
+            if (rows.length === 0)
                 rateQuery = `INSERT INTO pio_ratings (poi_id, user_id, rating) VALUES (${req.params.id}, ${req.user.user_id}, ${req.body.rating});`;
             else
                 rateQuery = `UPDATE pio_ratings SET rating = ${req.body.rating} WHERE user_id = ${req.user.user_id} AND poi_id = ${req.params.id};`;

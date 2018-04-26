@@ -331,6 +331,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                                         POIActivityIntent.putExtra("username", info.getUsername());
                                         POIActivityIntent.putExtra("id", info.getPoiId());
                                         POIActivityIntent.putExtra("rating", info.getRating());
+                                        POIActivityIntent.putExtra("Location", info.getLocation());
 
                                         MapActivity.this.startActivity(POIActivityIntent);
                                         return false;

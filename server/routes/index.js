@@ -23,19 +23,12 @@ router.get('/sign-s3', requireAuth, function(req, res) {
         };
     
         s3.getSignedUrl('putObject', s3Params, (err, data) => {
-        if(err){
-            console.log(err);
-            return res.end();
-        }
+            if(err){
+                console.log(err);
+                return res.end();
+            }
 
-        return res.json({ success: true, data: { postUrl: data, getUrl: data.split("?")[0] } });
-
-        /*const returnData = {
-            signedRequest: data,
-            url: `https://${process.env.S3_BUCKET_NAME}.s3.amazonaws.com/${fileName}`
-        };
-        res.write(JSON.stringify(returnData));
-        res.end();*/
+            return res.json({ success: true, data: { postUrl: data, getUrl: data.split("?")[0] } });
         });
     });
 

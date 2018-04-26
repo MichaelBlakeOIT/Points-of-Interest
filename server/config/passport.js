@@ -3,16 +3,13 @@ var JwtStrategy = require('passport-jwt').Strategy;
 var ExtractJwt = require('passport-jwt').ExtractJwt;
 var config = require('./data');
 
-//const requireAuth = passport.authenticate('jwt', { session: false });
-
 passport.use(
     new JwtStrategy({ 
         jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
         secretOrKey: config.jwtSecret
     }, 
     function(jwtPayload, done) {
-        //console.log(jwtPayload);
-        config.pool.query("SELECT username, user_id FROM users WHERE username = " + config.pool.escape(jwtPayload.username) + ";", function(err, rows) {
+        config.pool.query(`SELECT username, user_id FROM users WHERE username = ${config.pool.escape(jwtPayload.username)};`, function(err, rows) {
             if (err)
                 return done(err);
             if (!rows.length)

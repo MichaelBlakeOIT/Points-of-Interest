@@ -8,6 +8,7 @@ import android.media.Rating;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.RatingBar;
@@ -48,16 +49,16 @@ public class POIActivity extends Activity {
         TextView title_view = (TextView) findViewById(R.id.poi_title);
         TextView description_view = (TextView) findViewById(R.id.poi_description);
         TextView username_view = (TextView) findViewById(R.id.poi_username);
+        Button photos = (Button) findViewById(R.id.poi_view_photos);
         RatingBar ratingbar = (RatingBar) findViewById(R.id.ratingBar);
+        Button comments = (Button) findViewById(R.id.poi_view_comments);
 
         title_view.setText(title);
         description_view.setText(description);
         username_view.setText("Created by " + username);
         ratingbar.setRating(rating);
-        ratingbar.setIsIndicator(true);
 
-        final View button = findViewById(R.id.poi_username);
-        button.setOnClickListener(new View.OnClickListener() {
+        username_view.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 Intent poiActivityIntent = new Intent(POIActivity.this, ProfileActivity.class);
                 poiActivityIntent.putExtra("username", username);
@@ -69,6 +70,24 @@ public class POIActivity extends Activity {
             @Override
             public void onRatingChanged(RatingBar ratingBar, float v, boolean b) {
                 new RatePOITask((int) v).execute();
+            }
+        });
+
+        photos.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent photosIntent = new Intent(POIActivity.this, PhotosActivity.class);
+                photosIntent.putExtra("poi_id", mId);
+                POIActivity.this.startActivity(photosIntent);
+            }
+        });
+
+        comments.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent commentsIntent = new Intent(POIActivity.this, CommentActivity.class);
+                commentsIntent.putExtra("poi_id", mId);
+                POIActivity.this.startActivity(commentsIntent);
             }
         });
 
@@ -100,23 +119,20 @@ public class POIActivity extends Activity {
                     new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
-                            // response
                             try {
                                 JSONObject JSONResponse = new JSONObject(response);
-                                if (JSONResponse.getBoolean("success")) {
-                                    Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_SHORT).show();
+                                if (JSONResponse.getBoolean("success") != true) {
+                                    Toast.makeText(getApplicationContext(), "An error occurred", Toast.LENGTH_SHORT).show();
                                 }
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
-                            //Log.d("Response", response);
                         }
                     },
                     new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
-                            // error
-                            //Log.d("Error.Response", error.toString());
+                            Log.d("Error.Response", error.toString());
                         }
                     }
             ) {
@@ -145,7 +161,6 @@ public class POIActivity extends Activity {
 
     private class SavePOITask extends AsyncTask<Void, Void, Boolean> {
         private Context mContext;
-        private int mRating;
 
         @Override
         protected Boolean doInBackground(Void... params) {
@@ -157,7 +172,6 @@ public class POIActivity extends Activity {
                     new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
-                            // response
                             try {
                                 JSONObject JSONResponse = new JSONObject(response);
                                 if (JSONResponse.getBoolean("success")) {
@@ -166,14 +180,12 @@ public class POIActivity extends Activity {
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
-                            //Log.d("Response", response);
                         }
                     },
                     new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
-                            // error
-                            //Log.d("Error.Response", error.toString());
+                            Log.d("Error.Response", error.toString());
                         }
                     }
             ) {
