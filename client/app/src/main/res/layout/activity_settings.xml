@@ -6,15 +6,14 @@
     android:layout_height="match_parent"
     tools:context="poi.michael.pointsofinterest.SettingsActivity">
 
-    <EditText
+    <android.support.v7.widget.AppCompatEditText
         android:id="@+id/bio_text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="4dp"
-        android:ems="10"
-        android:backgroundTint="@android:color/holo_blue_bright"
+        app:backgroundTint="@android:color/holo_blue_bright"
         android:inputType="textMultiLine"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
@@ -27,19 +26,18 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="32dp"
-        android:text="Biography"
+        android:text="@string/biography"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <EditText
+    <android.support.v7.widget.AppCompatEditText
         android:id="@+id/change_password_text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
-        android:backgroundTint="@android:color/holo_blue_bright"
+        app:backgroundTint="@android:color/holo_blue_bright"
         android:layout_marginStart="16dp"
         android:layout_marginTop="12dp"
-        android:ems="10"
         android:hint="@string/unchanged_hint"
         android:inputType="textPassword"
         app:layout_constraintEnd_toEndOf="parent"
@@ -57,15 +55,14 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/bio_text" />
 
-    <EditText
+    <android.support.v7.widget.AppCompatEditText
         android:id="@+id/change_password_repeat_text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="12dp"
-        android:ems="10"
-        android:backgroundTint="@android:color/holo_blue_bright"
+        app:backgroundTint="@android:color/holo_blue_bright"
         android:hint="@string/unchanged_hint"
         android:inputType="textPassword"
         app:layout_constraintEnd_toEndOf="parent"

@@ -39,4 +39,11 @@
     <string name="comments">Comments</string>
     <string name="forgot_password">Forgot Password</string>
     <string name="send_email">Send Email</string>
+    <string name="follow">Follow</string>
+    <string name="code_hint">Code From Email</string>
+    <string name="repeat_password">Repeat Password</string>
+    <string name="reset_button_text">Reset</string>
+    <string name="register">Register</string>
+    <string name="biography">Biography</string>
+    <string name="checkbox_only_followed_users">Followed Users Only</string>
 </resources>

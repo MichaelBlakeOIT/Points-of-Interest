@@ -20,21 +20,21 @@
             android:textAlignment="center"
             android:textAppearance="@style/TextAppearance.AppCompat.Title" />
 
-        <EditText
+        <android.support.v7.widget.AppCompatEditText
             android:id="@+id/PoiName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="10"
             android:inputType="textPersonName"
             android:hint="@string/poi_name_hint"
-            android:backgroundTint="@android:color/holo_blue_bright" />
+            app:backgroundTint="@android:color/holo_blue_bright" />
 
-        <EditText
+        <android.support.v7.widget.AppCompatEditText
             android:id="@+id/PoiDescription"
             android:inputType="textMultiLine"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:backgroundTint="@android:color/holo_blue_bright"
+            app:backgroundTint="@android:color/holo_blue_bright"
             android:hint="@string/poi_description_hint" />
 
         <Button
