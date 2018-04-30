@@ -71,7 +71,6 @@ public class PhotosActivity extends Activity {
         // Ensure that there's a camera activity to handle the intent
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
             // Create the File where the photo should go
-            //File photoFile = null;
             try {
                 photoFile = createImageFile();
 
@@ -92,22 +91,18 @@ public class PhotosActivity extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            //URI photo = (URI) data.getExtras().get("data");
             if (photoFile != null) {
                 String filename = UUID.randomUUID().toString();
                 ImageTools.uploadData(photoFile, "pois/" + filename, getApplicationContext());
                 new RegisterPhotoTask(filename).execute();
                 new GetPhotosTask().execute();
             }
-            //uploadData(mCurrentPhotoPath, mImageFileName);
         }
     }
 
     private File createImageFile() throws IOException {
         // Create an image file name
-        //String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         mImageFileName = "JPEG_" + UUID.randomUUID().toString() + "_";
-        //mImageFileName = "JPEG_" + timeStamp + "_";
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         File image = File.createTempFile(
                 mImageFileName,  /* prefix */

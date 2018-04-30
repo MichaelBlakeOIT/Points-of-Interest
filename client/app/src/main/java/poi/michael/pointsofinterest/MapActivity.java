@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.support.v4.app.ActivityCompat;
@@ -15,6 +14,7 @@ import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -47,7 +47,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     private GoogleMap mMap;
     private LocationManager mLocationManager;
-    private LatLng mUserLocation;
     public static final int CREATE_POI_REQUEST = 2;
 
     @Override
@@ -91,8 +90,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         });
 
         new loadPoints(false).execute();
-
-        //mUserLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
     }
 
     @Override
@@ -236,19 +233,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             coordinate = new LatLng(location.getLatitude(), location.getLongitude());
         }
 
-        //CameraUpdate cLocation = CameraUpdateFactory.newLatLngZoom(
-         //       coordinate, 15);
-
         if(coordinate != null) {
-            /*CameraPosition cameraPosition = new CameraPosition.Builder()
-                    .target(coordinate)
-                    .zoom(16)
-                    .build();
-
-            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), 10000, null);*/
-
             googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(coordinate, 15));
-            //mapView.onResume();
         }
     }
 
@@ -341,14 +327,12 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
-                            //Log.d("Response", response);
                         }
                     },
                     new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
-                            // error
-                            //Log.d("Error.Response", error.toString());
+                            Log.d("Error.Response", error.toString());
                         }
                     }
             ) {

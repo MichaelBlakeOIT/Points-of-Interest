@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -29,18 +28,19 @@ public class addPoiActivity extends Activity {
 
     private double mLatitude = 0;
     private double mLongitude = 0;
+    private Button mAddPoiButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_poi);
+        mAddPoiButton = (Button) findViewById(R.id.AddPoiButton);
 
         Intent intentExtras = getIntent();
         mLatitude = intentExtras.getDoubleExtra("latitude", 0);
         mLongitude = intentExtras.getDoubleExtra("longitude", 0);
 
-        final Button addPoiButton = (Button) findViewById(R.id.AddPoiButton);
-        addPoiButton.setOnClickListener(mAddPoiListener);
+        mAddPoiButton.setOnClickListener(mAddPoiListener);
     }
 
     private View.OnClickListener mAddPoiListener = new View.OnClickListener() {
@@ -131,7 +131,6 @@ public class addPoiActivity extends Activity {
             sendPointInfo.putExtra("name", mName);
             sendPointInfo.putExtra("description", mDescription);
             setResult(Activity.RESULT_OK, sendPointInfo);
-            //addPoint.addMarker(new LatLng(mLat, mLong), mName);
             finish();
         }
 

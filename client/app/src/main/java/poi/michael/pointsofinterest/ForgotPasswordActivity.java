@@ -3,9 +3,7 @@ package poi.michael.pointsofinterest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -59,7 +57,6 @@ public class ForgotPasswordActivity extends Activity {
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
-                            //Log.d("Response", response);
                         }
                     },
                     new Response.ErrorListener()
@@ -88,7 +85,7 @@ public class ForgotPasswordActivity extends Activity {
         EditText usernameText = (EditText) findViewById(R.id.resetpasswordusernamefield);
         String username = usernameText.getText().toString();
 
-        if (username != "") {
+        if (!username.equals("")) {
             new SendEmailTask(usernameText.getText().toString()).execute();
             Intent launchResetIntent = new Intent(ForgotPasswordActivity.this, ResetPasswordActivity.class);
             launchResetIntent.putExtra("username", username);

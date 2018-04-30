@@ -11,128 +11,84 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="poi.michael.pointsofinterest.LoginActivity">
 
-    <ScrollView
-        android:id="@+id/login_form"
+    <android.support.v7.widget.AppCompatAutoCompleteTextView
+        android:id="@+id/UsernameLoginField"
         android:layout_width="match_parent"
-        android:layout_height="185dp">
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:completionHint="Enter Your Username"
+        android:hint="@string/prompt_username"
+        android:inputType="text"
+        android:maxLines="1"
+        android:textColorLink="@android:color/black"
+        android:textCursorDrawable="@null"
+        app:backgroundTint="@android:color/holo_blue_bright" />
 
-        <LinearLayout
-            android:id="@+id/email_login_form"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:descendantFocusability="beforeDescendants"
-            android:focusableInTouchMode="true">
+    <android.support.v7.widget.AppCompatEditText
+        android:id="@+id/passwordLoginField"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:hint="@string/prompt_password"
+        android:inputType="textPassword"
+        android:maxLines="1"
+        android:textCursorDrawable="@null"
+        app:backgroundTint="@android:color/holo_blue_bright" />
 
-            <android.support.design.widget.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <android.support.v7.widget.AppCompatAutoCompleteTextView
-                    android:id="@+id/UsernameLoginField"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:backgroundTint="@android:color/holo_blue_bright"
-                    android:completionHint="Enter Your Username"
-                    android:hint="@string/prompt_username"
-                    android:inputType="text"
-                    android:maxLines="1"
-                    android:textColorLink="@android:color/black"
-                    android:textCursorDrawable="@null" />
-
-            </android.support.design.widget.TextInputLayout>
-
-            <android.support.design.widget.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <android.support.v7.widget.AppCompatEditText
-                    android:id="@+id/passwordLoginField"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textCursorDrawable="@null"
-                    app:backgroundTint="@android:color/holo_blue_bright"
-                    android:hint="@string/prompt_password"
-                    android:imeActionLabel="@string/action_sign_in_short"
-                    android:imeOptions="actionUnspecified"
-                    android:inputType="textPassword"
-                    android:maxLines="1" />
-
-            </android.support.design.widget.TextInputLayout>
-
-            <Button
-                android:id="@+id/sign_in_button"
-                style="?android:textAppearanceSmall"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:background="@android:color/holo_blue_dark"
-                android:text="@string/login"
-                android:textStyle="bold" />
-
-        </LinearLayout>
-    </ScrollView>
+    <Button
+        android:id="@+id/sign_in_button"
+        style="?android:textAppearanceSmall"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:background="@android:color/holo_blue_dark"
+        android:text="@string/login"
+        android:textStyle="bold" />
 
     <LinearLayout
-        android:layout_width="fill_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:gravity="center"
-        android:layout_marginTop="8dp">
+        android:orientation="horizontal">
 
-        <LinearLayout
+        <TextView
+            android:id="@+id/textView4"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            android:layout_marginTop="10dp"
+            android:text="@string/textview_register" />
 
-            <TextView
-                android:id="@+id/textView4"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="start"
-                android:layout_marginStart="11dp"
-                android:layout_marginTop="22dp"
-                android:text="@string/textview_register" />
-
-            <TextView
-                android:id="@+id/registerSelect"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="end"
-                android:text="@string/textview_register_select"
-                android:textStyle="bold" />
-        </LinearLayout>
-
-        <LinearLayout
+        <TextView
+            android:id="@+id/registerSelect"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent">
-
-            <TextView
-                android:id="@+id/forgot_password_text"
-                android:layout_width="match_parent"
-                android:gravity="center"
-                android:layout_height="wrap_content"
-                android:layout_gravity="start"
-                android:layout_marginStart="11dp"
-                android:layout_marginTop="22dp"
-                android:text="@string/forgot_password_question" />
-
-            <TextView
-                android:id="@+id/forgot_select"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="end"
-                android:text="@string/reset_password"
-                android:onClick="launchForgot"
-                android:textStyle="bold" />
-
-        </LinearLayout>
+            android:layout_marginTop="10dp"
+            android:text="@string/textview_register_select"
+            android:textStyle="bold" />
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <TextView
+            android:id="@+id/forgot_password_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:gravity="center"
+            android:text="@string/forgot_password_question" />
+
+        <TextView
+            android:id="@+id/forgot_select"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:onClick="launchForgot"
+            android:text="@string/reset_password"
+            android:textStyle="bold" />
+
+    </LinearLayout>
 </LinearLayout>

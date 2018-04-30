@@ -12,7 +12,6 @@ import android.os.Build;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -20,9 +19,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.mobile.client.AWSMobileClient;
-import com.amazonaws.services.s3.AmazonS3Client;
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -37,7 +33,6 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.amazonaws.mobileconnectors.s3.transferutility.*;
 public class SettingsActivity extends Activity {
 
     public static final int RESULT_LOAD_IMG = 0;
@@ -226,7 +221,6 @@ public class SettingsActivity extends Activity {
                 Uri uri = data.getData();
                 String path = getPath(uri);
                 ImageTools.uploadData(new File(path), "profile_photos/" + username + ".jpg", getApplicationContext());
-                //uploadData(new File(path));
             } catch (URISyntaxException e) {
                 Log.e("SettingsActivity", "Unable to upload file from the given uri", e);
             }

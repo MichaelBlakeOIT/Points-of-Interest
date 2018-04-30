@@ -1,8 +1,6 @@
 package poi.michael.pointsofinterest;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.util.Log;
 import android.widget.Toast;
@@ -26,9 +24,8 @@ class ImageTools {
         cropW = (cropW < 0)? 0: cropW;
         int cropH = (height - width) / 2;
         cropH = (cropH < 0)? 0: cropH;
-        Bitmap cropImg = Bitmap.createBitmap(bitmap, cropW, cropH, newWidth, newHeight);
 
-        return cropImg;
+        return Bitmap.createBitmap(bitmap, cropW, cropH, newWidth, newHeight);
     }
 
     static void uploadData(File image, String key, final Context context) {

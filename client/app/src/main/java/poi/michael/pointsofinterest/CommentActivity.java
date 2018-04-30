@@ -188,7 +188,6 @@ public class CommentActivity extends Activity {
                             try {
                                 JSONObject JSONResponse = new JSONObject(response);
                                 if (JSONResponse.getBoolean("success")) {
-                                    //Toast.makeText(getApplicationContext(), "Successfully added comment", Toast.LENGTH_SHORT).show();
                                     SharedPreferences sharedPref = getSharedPreferences(getString(R.string.user_token), Context.MODE_PRIVATE);
                                     String username =  sharedPref.getString("username", "");
                                     list_comments.add(new Comment(mCommentText, 0, mPoiId, 0, username));

@@ -7,7 +7,6 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -59,7 +58,6 @@ public class ProfileActivity extends Activity {
         mProfileUsername = intentExtras.getStringExtra("username");
 
         if (mProfileUsername != null) {
-            //mProfileUsername = mProfileUsername.replaceAll("\\s+","");
             mProfileUsername = mProfileUsername.trim();
         }
         mLinearLayoutManager = new LinearLayoutManager(this);

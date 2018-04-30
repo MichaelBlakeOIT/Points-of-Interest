@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -44,8 +44,6 @@ public class SignupActivity extends Activity {
 
             new UserSignupTask(email.getText().toString(), password.getText().toString(), username.getText().toString(),
                                first.getText().toString(), last.getText().toString()).execute();
-            //mSignInButton.setText("TEST");
-            // Instantiate the RequestQueue.
 
         }
     };
@@ -92,14 +90,12 @@ public class SignupActivity extends Activity {
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
-                            //Log.d("Response", response);
                         }
                     },
                     new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
-                            // error
-                            //Log.d("Error.Response", error.toString());
+                            Log.d("Error.Response", error.toString());
                         }
                     }
             ) {
