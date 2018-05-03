@@ -75,9 +75,8 @@ public class LoginActivity extends Activity {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            ProgressDialog progDialog;
-            progDialog = new ProgressDialog(LoginActivity.this);
-            progDialog.setMessage("Logging in...");
+            ProgressDialog progDialog = new ProgressDialog(LoginActivity.this);
+            progDialog.setMessage("Logging in…");
             progDialog.setIndeterminate(false);
             progDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
             progDialog.setCancelable(true);
