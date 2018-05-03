@@ -29,10 +29,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class LoginActivity extends Activity {
-    private AutoCompleteTextView mEmailView;
+    private AutoCompleteTextView mUsernameView;
     private EditText mPasswordView;
-    private View mProgressView;
-    private View mLoginFormView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,10 +50,13 @@ public class LoginActivity extends Activity {
     {
         public void onClick(View v)
         {
-            AutoCompleteTextView username = (AutoCompleteTextView) findViewById(R.id.UsernameLoginField);
-            EditText password = (EditText) findViewById(R.id.passwordLoginField);
+            mUsernameView = (AutoCompleteTextView) findViewById(R.id.UsernameLoginField);
+            mPasswordView = (EditText) findViewById(R.id.passwordLoginField);
 
-            new UserLoginTask(username.getText().toString(), password.getText().toString()).execute();
+            String username = mUsernameView.getText().toString();
+            String password = mPasswordView.getText().toString();
+
+            new UserLoginTask().execute(username, password);
         }
     };
 
@@ -69,21 +70,12 @@ public class LoginActivity extends Activity {
         }
     };
 
-    private class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
-
-        private final String mUsername;
-        private final String mPassword;
-        ProgressDialog progDialog;
-        private Context mContext;
-
-        UserLoginTask(String username, String password) {
-            mUsername = username;
-            mPassword = password;
-        }
+    private class UserLoginTask extends AsyncTask<String, Void, String> {
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+            ProgressDialog progDialog;
             progDialog = new ProgressDialog(LoginActivity.this);
             progDialog.setMessage("Logging in...");
             progDialog.setIndeterminate(false);
@@ -93,62 +85,34 @@ public class LoginActivity extends Activity {
         }
 
         @Override
-        protected Boolean doInBackground(Void... params) {
-            String url = getResources().getString(R.string.base_url) + "/session";
-            mContext = getApplicationContext();
+        protected String doInBackground(String... params) {
+            String username = params[0];
+            String password = params[1];
 
-            StringRequest postRequest = new StringRequest(Request.Method.POST, url,
-                    new Response.Listener<String>()
-                    {
-                        @Override
-                        public void onResponse(String response) {
-                            progDialog.dismiss();
+            String response = new APIRequests().login(username, password);
 
-                            try {
-                                JSONObject JSONResponse = new JSONObject(response);
-                                if (JSONResponse.getBoolean("success")) {
-                                    SharedPreferences sharedPref = getSharedPreferences(getString(R.string.user_token), Context.MODE_PRIVATE);
-                                    SharedPreferences.Editor editor = sharedPref.edit();
+            return response;
+        }
 
-                                    editor.putString("token", JSONResponse.getString("token"));
-                                    editor.putString("username", mUsername);
-                                    editor.apply();
+        @Override
+        protected void onPostExecute(final String token) {
+            if (token != null) {
+                SharedPreferences sharedPref = getSharedPreferences(getString(R.string.user_token), Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPref.edit();
 
-                                    Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_SHORT).show();
+                editor.putString("token", token);
+                //editor.putString("username", mUsername); TODO: Add username somewewhere else
+                editor.apply();
 
-                                    Intent MapActivityIntent = new Intent(LoginActivity.this, MapActivity.class);
-                                    LoginActivity.this.startActivity(MapActivityIntent);
+                Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_SHORT).show();
 
-                                    LoginActivity.this.finish();
-                                } else {
-                                    Toast.makeText(getApplicationContext(), "Incorrect login", Toast.LENGTH_SHORT).show();
-                                }
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    },
-                    new Response.ErrorListener()
-                    {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            Log.d("Error.Response", error.toString());
-                        }
-                    }
-            ) {
-                @Override
-                protected Map<String, String> getParams()
-                {
-                    Map<String, String>  params = new HashMap<String, String>();
-                    params.put("username", mUsername);
-                    params.put("password", mPassword);
+                Intent MapActivityIntent = new Intent(LoginActivity.this, MapActivity.class);
+                LoginActivity.this.startActivity(MapActivityIntent);
 
-                    return params;
-                }
-            };
-            volleySingleton.getInstance(mContext).getRequestQueue().add(postRequest);
-
-            return true;
+                LoginActivity.this.finish();
+            } else {
+                Toast.makeText(getApplicationContext(), "Incorrect login", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
