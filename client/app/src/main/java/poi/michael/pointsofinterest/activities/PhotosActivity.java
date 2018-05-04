@@ -1,4 +1,4 @@
-package poi.michael.pointsofinterest;
+package poi.michael.pointsofinterest.activities;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -39,6 +39,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+
+import poi.michael.pointsofinterest.utils.ImageTools;
+import poi.michael.pointsofinterest.R;
+import poi.michael.pointsofinterest.utils.volleySingleton;
 
 public class PhotosActivity extends Activity {
 

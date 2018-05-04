@@ -1,4 +1,4 @@
-package poi.michael.pointsofinterest;
+package poi.michael.pointsofinterest.activities;
 
 import android.app.Activity;
 import android.content.ContentUris;
@@ -32,6 +32,10 @@ import java.io.File;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
+
+import poi.michael.pointsofinterest.utils.ImageTools;
+import poi.michael.pointsofinterest.R;
+import poi.michael.pointsofinterest.utils.volleySingleton;
 
 public class SettingsActivity extends Activity {
 

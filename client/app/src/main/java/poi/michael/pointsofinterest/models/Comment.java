@@ -1,4 +1,4 @@
-package poi.michael.pointsofinterest;
+package poi.michael.pointsofinterest.models;
 
 /**
  * Created by micha on 3/12/2018.
@@ -11,7 +11,7 @@ public class Comment {
     private int m_comment_id;
     private String m_username;
 
-    Comment(String comment, int user_id, int poi_id, int comment_id, String username) {
+    public Comment(String comment, int user_id, int poi_id, int comment_id, String username) {
         m_comment = comment;
         m_comment_id = comment_id;
         m_user_id = user_id;
@@ -19,23 +19,23 @@ public class Comment {
         m_poi_id = poi_id;
     }
 
-    String getComment() {
+    public String getComment() {
         return m_comment;
     }
 
-    int getPoiId() {
+    public int getPoiId() {
         return m_poi_id;
     }
 
-    String getUsername() {
+    public String getUsername() {
         return m_username;
     }
 
-    int getCommentId() {
+    public int getCommentId() {
         return m_comment_id;
     }
 
-    int getUserId() {
+    public int getUserId() {
         return m_user_id;
     }
 }

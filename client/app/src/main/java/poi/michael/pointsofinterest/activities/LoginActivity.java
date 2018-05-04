@@ -1,4 +1,4 @@
-package poi.michael.pointsofinterest;
+package poi.michael.pointsofinterest.activities;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -13,6 +13,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import poi.michael.pointsofinterest.utils.APIRequests;
+import poi.michael.pointsofinterest.R;
 
 public class LoginActivity extends Activity {
     private AutoCompleteTextView mUsernameView;

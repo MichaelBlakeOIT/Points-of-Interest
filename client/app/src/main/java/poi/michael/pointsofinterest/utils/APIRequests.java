@@ -1,4 +1,4 @@
-package poi.michael.pointsofinterest;
+package poi.michael.pointsofinterest.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -18,6 +18,9 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import poi.michael.pointsofinterest.models.Comment;
+import poi.michael.pointsofinterest.R;
+import poi.michael.pointsofinterest.models.NamedLocation;
 
 /**
  * Created by michael on 4/17/2018.
@@ -29,7 +32,7 @@ public class APIRequests {
     private Context mContext;
     private OkHttpClient client = new OkHttpClient();
 
-    APIRequests(Context context) {
+    public APIRequests(Context context) {
         mContext = context;
     }
 
@@ -40,7 +43,7 @@ public class APIRequests {
      * Returns auth token
      */
 
-    String login(String username, String password) {
+    public String login(String username, String password) {
         String url = base_api_url + "session";
 
         RequestBody formBody = new FormBody.Builder()
@@ -82,7 +85,7 @@ public class APIRequests {
      * Retuns true on successful sign up, false otherwise.
      */
 
-    boolean register(String username, String password, String first_name, String last_name, String email) {
+    public boolean register(String username, String password, String first_name, String last_name, String email) {
         String url = base_api_url + "users";
 
         RequestBody formBody = new FormBody.Builder()
@@ -122,7 +125,7 @@ public class APIRequests {
      * returns ArrayList of NamedLocations
      */
 
-    ArrayList<NamedLocation> getPOIs(boolean followed_only) {
+    public ArrayList<NamedLocation> getPOIs(boolean followed_only) {
         String url = base_api_url;
 
         if(followed_only)
@@ -175,7 +178,7 @@ public class APIRequests {
         }
     }
 
-    boolean makeComment(int poiId, String commentText) {
+    public boolean makeComment(int poiId, String commentText) {
         String url = base_api_url + "poi/" + poiId + "/comments";
 
         RequestBody formBody = new FormBody.Builder()
@@ -205,7 +208,7 @@ public class APIRequests {
         }
     }
 
-    List<Comment> getComments(int poiId) {
+    public List<Comment> getComments(int poiId) {
         String url = base_api_url + "poi/" + poiId + "/comments";
         List<Comment> list_comments = new ArrayList<>();
 

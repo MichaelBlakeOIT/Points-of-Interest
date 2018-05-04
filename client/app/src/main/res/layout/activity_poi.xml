@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center_horizontal"
-    tools:context="poi.michael.pointsofinterest.POIActivity"
+    tools:context="poi.michael.pointsofinterest.activities.POIActivity"
     android:orientation="vertical">
 
     <TextView

@@ -1,17 +1,18 @@
-package poi.michael.pointsofinterest;
+package poi.michael.pointsofinterest.activities;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.android.volley.AuthFailureError;
@@ -36,37 +37,26 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class SavedPois extends Activity {
+import poi.michael.pointsofinterest.models.NamedLocation;
+import poi.michael.pointsofinterest.R;
+import poi.michael.pointsofinterest.utils.volleySingleton;
+
+public class FeedActivity extends Activity {
     private RecyclerView mRecyclerView;
 
     private LinearLayoutManager mLinearLayoutManager;
-    private GridLayoutManager mGridLayoutManager;
+
+    private List<NamedLocation> list_locations = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_saved_pois);
+        setContentView(R.layout.activity_feed);
 
-        mGridLayoutManager = new GridLayoutManager(this, 2);
         mLinearLayoutManager = new LinearLayoutManager(this);
 
         new GetSavedPOIsTask().execute();
     }
-
-    private RecyclerView.RecyclerListener mRecycleListener = new RecyclerView.RecyclerListener() {
-
-        @Override
-        public void onViewRecycled(RecyclerView.ViewHolder holder) {
-            MapAdapter.ViewHolder mapHolder = (MapAdapter.ViewHolder) holder;
-            if (mapHolder != null && mapHolder.map != null) {
-                // Clear the map and free up resources by changing the map type to none.
-                // Also reset the map when it gets reattached to layout, so the previous map would
-                // not be displayed.
-                mapHolder.map.clear();
-                mapHolder.map.setMapType(GoogleMap.MAP_TYPE_NONE);
-            }
-        }
-    };
 
     private class MapAdapter extends RecyclerView.Adapter<MapAdapter.ViewHolder> {
 
@@ -105,6 +95,8 @@ public class SavedPois extends Activity {
             MapView mapView;
             TextView title;
             GoogleMap map;
+            Button comments;
+            Button photos;
             View layout;
 
             private ViewHolder(View itemView) {
@@ -112,6 +104,8 @@ public class SavedPois extends Activity {
                 layout = itemView;
                 mapView = (MapView) layout.findViewById(R.id.lite_listrow_map);
                 title = (TextView) layout.findViewById(R.id.saved_poi_title);
+                comments = (Button) layout.findViewById(R.id.comments_button);
+                photos = (Button) layout.findViewById(R.id.photos_button);
                 if (mapView != null) {
                     // Initialise the MapView
                     mapView.onCreate(null);
@@ -134,8 +128,8 @@ public class SavedPois extends Activity {
                 if (data == null) return;
 
                 // Add a marker for this item and set the camera
-                map.moveCamera(CameraUpdateFactory.newLatLngZoom(data.location, 13f));
-                map.addMarker(new MarkerOptions().position(data.location));
+                map.moveCamera(CameraUpdateFactory.newLatLngZoom(data.getLocation(), 13f));
+                map.addMarker(new MarkerOptions().position(data.getLocation()));
 
                 // Set the map type back to normal.
                 map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
@@ -143,7 +137,7 @@ public class SavedPois extends Activity {
                 mapView.onResume();
             }
 
-            private void bindView(int pos) {
+            private void bindView(final int pos) {
                 NamedLocation item = namedLocations.get(pos);
                 // Store a reference of the ViewHolder object in the layout.
                 layout.setTag(this);
@@ -151,32 +145,35 @@ public class SavedPois extends Activity {
                 // coordinate of a location, when setting the map location.
                 mapView.setTag(item);
                 setMapLocation();
-                title.setText(item.name);
+                title.setText(item.getName());
+                comments.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent commentsIntent = new Intent(FeedActivity.this, CommentActivity.class);
+                        commentsIntent.putExtra("poi_id", namedLocations.get(pos).getPoiId());
+                        FeedActivity.this.startActivity(commentsIntent);
+                    }
+                });
+                photos.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent photosIntent = new Intent(FeedActivity.this, PhotosActivity.class);
+                        photosIntent.putExtra("poi_id", namedLocations.get(pos).getPoiId());
+                        FeedActivity.this.startActivity(photosIntent);
+                    }
+                });
             }
         }
     }
 
-    private static class NamedLocation {
-
-        public final String name;
-        public final LatLng location;
-
-        NamedLocation(String name, LatLng location) {
-            this.name = name;
-            this.location = location;
-        }
-    }
-
-    private List<NamedLocation> list_locations = new ArrayList<>();
-
     private class GetSavedPOIsTask extends AsyncTask<Void, Void, Boolean> {
         private Context mContext;
-        private int mRating;
 
         @Override
         protected Boolean doInBackground(Void... params) {
+            String url = getResources().getString(R.string.base_url) + "/users/following";
+
             mContext = getApplicationContext();
-            String url = getResources().getString(R.string.base_url) + "/users/pois/saved";
 
             StringRequest saveRequest = new StringRequest(Request.Method.GET, url,
                     new Response.Listener<String>() {
@@ -194,14 +191,14 @@ public class SavedPois extends Activity {
                                     Double _long = POI.getDouble("long");
                                     String title = POI.getString("title");
                                     String description = POI.getString("description");
-                                    int userId = POI.getInt("creator_id");
-                                    int poiId = POI.getInt("pio_id");
-                                    String username = POI.getString("creator");
+                                    int userId = POI.getInt("user_id");
+                                    int poi_id = POI.getInt("pio_id");
+                                    String username = POI.getString("username");
 
-                                    list_locations.add(new NamedLocation(title, new LatLng(lat, _long)));
+                                    list_locations.add(new NamedLocation(title, new LatLng(lat, _long), poi_id));
                                 }
 
-                                mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+                                mRecyclerView = (RecyclerView) findViewById(R.id.following_feed);
                                 mRecyclerView.setHasFixedSize(true);
                                 mRecyclerView.setLayoutManager(mLinearLayoutManager);
                                 mRecyclerView.setAdapter(new MapAdapter(list_locations));
@@ -232,4 +229,19 @@ public class SavedPois extends Activity {
             return true;
         }
     }
+
+    private RecyclerView.RecyclerListener mRecycleListener = new RecyclerView.RecyclerListener() {
+
+        @Override
+        public void onViewRecycled(RecyclerView.ViewHolder holder) {
+            MapAdapter.ViewHolder mapHolder = (MapAdapter.ViewHolder) holder;
+            if (mapHolder != null && mapHolder.map != null) {
+                // Clear the map and free up resources by changing the map type to none.
+                // Also reset the map when it gets reattached to layout, so the previous map would
+                // not be displayed.
+                mapHolder.map.clear();
+                mapHolder.map.setMapType(GoogleMap.MAP_TYPE_NONE);
+            }
+        }
+    };
 }

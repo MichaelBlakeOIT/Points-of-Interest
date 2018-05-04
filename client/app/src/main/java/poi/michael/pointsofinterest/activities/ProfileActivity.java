@@ -1,4 +1,4 @@
-package poi.michael.pointsofinterest;
+package poi.michael.pointsofinterest.activities;
 
 import android.app.Activity;
 import android.content.Context;
@@ -40,6 +40,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import poi.michael.pointsofinterest.models.NamedLocation;
+import poi.michael.pointsofinterest.utils.ImageTools;
+import poi.michael.pointsofinterest.R;
+import poi.michael.pointsofinterest.utils.volleySingleton;
 
 public class ProfileActivity extends Activity {
     private String mProfileUsername;

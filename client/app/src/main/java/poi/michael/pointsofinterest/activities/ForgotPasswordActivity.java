@@ -1,4 +1,4 @@
-package poi.michael.pointsofinterest;
+package poi.michael.pointsofinterest.activities;
 
 import android.app.Activity;
 import android.content.Context;
@@ -21,30 +21,24 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ResetPasswordActivity extends Activity {
+import poi.michael.pointsofinterest.R;
+import poi.michael.pointsofinterest.utils.volleySingleton;
 
-    String mUsername;
+public class ForgotPasswordActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_reset_password);
-
-        Intent getExtras = getIntent();
-        mUsername = getExtras.getStringExtra("username");
+        setContentView(R.layout.activity_forgot_password);
     }
 
-    private class ResetPasswordTask extends AsyncTask<Void, Void, Boolean> {
+    private class SendEmailTask extends AsyncTask<Void, Void, Boolean> {
 
         private final String mUsername;
-        private final String mPassword;
-        private final String mCode;
         private Context mContext;
 
-        ResetPasswordTask(String username, String password, String code) {
+        SendEmailTask(String username) {
             mUsername = username;
-            mPassword = password;
-            mCode = code;
         }
 
         @Override
@@ -52,7 +46,7 @@ public class ResetPasswordActivity extends Activity {
             String url = getResources().getString(R.string.base_url) + "/users/reset";
             mContext = getApplicationContext();
 
-            StringRequest postRequest = new StringRequest(Request.Method.PUT, url,
+            StringRequest postRequest = new StringRequest(Request.Method.POST, url,
                     new Response.Listener<String>()
                     {
                         @Override
@@ -62,12 +56,6 @@ public class ResetPasswordActivity extends Activity {
                                 JSONObject JSONResponse = new JSONObject(response);
                                 if (!JSONResponse.getBoolean("success")) {
                                     Toast.makeText(getApplicationContext(), "An error occurred", Toast.LENGTH_SHORT).show();
-                                }
-                                else {
-                                    Toast.makeText(getApplicationContext(), "Password reset", Toast.LENGTH_SHORT);
-                                    Intent homescreen = new Intent(ResetPasswordActivity.this, LoginActivity.class);
-                                    ResetPasswordActivity.this.startActivity(homescreen);
-                                    ResetPasswordActivity.this.finish();
                                 }
                             } catch (JSONException e) {
                                 e.printStackTrace();
@@ -88,32 +76,23 @@ public class ResetPasswordActivity extends Activity {
                 {
                     Map<String, String>  params = new HashMap<String, String>();
                     params.put("username", mUsername);
-                    params.put("code", mCode);
-                    params.put("password", mPassword);
                     return params;
                 }
             };
             volleySingleton.getInstance(mContext).getRequestQueue().add(postRequest);
-            // TODO: register the new account here.
             return true;
         }
     }
 
-    public void resetPassword(View v) {
-        EditText codeText = (EditText) findViewById(R.id.code);
-        EditText passwordText = (EditText) findViewById(R.id.resetPasswordField);
-        EditText passwordText2 = (EditText) findViewById(R.id.repeatPasswordReset);
+    public void launchReset(View v) {
+        EditText usernameText = (EditText) findViewById(R.id.resetpasswordusernamefield);
+        String username = usernameText.getText().toString();
 
-        String code = codeText.getText().toString();
-        String password = passwordText.getText().toString();
-        String password2 = passwordText2.getText().toString();
-
-        if (code.equals("") || password.equals("") || !password.equals(password2)) {
-            Toast.makeText(getApplicationContext(), "Invalid form", Toast.LENGTH_SHORT);
-        }
-        else {
-            new ResetPasswordTask(mUsername, password, code).execute();
-            Log.e("Here", mUsername + password + code);
+        if (!username.equals("")) {
+            new SendEmailTask(usernameText.getText().toString()).execute();
+            Intent launchResetIntent = new Intent(ForgotPasswordActivity.this, ResetPasswordActivity.class);
+            launchResetIntent.putExtra("username", username);
+            ForgotPasswordActivity.this.startActivity(launchResetIntent);
         }
     }
 }

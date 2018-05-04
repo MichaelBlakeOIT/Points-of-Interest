@@ -1,4 +1,4 @@
-package poi.michael.pointsofinterest;
+package poi.michael.pointsofinterest.utils;
 
 import android.content.Context;
 
@@ -9,12 +9,12 @@ import com.android.volley.toolbox.Volley;
  * Created by michael1026 on 10/19/2017.
  */
 
-class volleySingleton {
+public class volleySingleton {
     private static volleySingleton mInstance;
     private RequestQueue mQueue;
     private static Context mContext;
 
-    static volleySingleton getInstance(Context context) {
+    public static volleySingleton getInstance(Context context) {
         if(mInstance == null){
             mInstance = new volleySingleton(context);
         }

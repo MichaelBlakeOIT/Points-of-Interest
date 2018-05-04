@@ -1,4 +1,4 @@
-package poi.michael.pointsofinterest;
+package poi.michael.pointsofinterest.utils;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -14,8 +14,10 @@ import com.amazonaws.services.s3.AmazonS3Client;
 
 import java.io.File;
 
-class ImageTools {
-    static Bitmap cropToSquare(Bitmap bitmap){
+import poi.michael.pointsofinterest.R;
+
+public class ImageTools {
+    public static Bitmap cropToSquare(Bitmap bitmap){
         int width  = bitmap.getWidth();
         int height = bitmap.getHeight();
         int newWidth = (height > width) ? width : height;
@@ -28,7 +30,7 @@ class ImageTools {
         return Bitmap.createBitmap(bitmap, cropW, cropH, newWidth, newHeight);
     }
 
-    static void uploadData(File image, String key, final Context context) {
+    public static void uploadData(File image, String key, final Context context) {
         TransferUtility transferUtility =
                 TransferUtility.builder()
                         .defaultBucket("points-of-interest")

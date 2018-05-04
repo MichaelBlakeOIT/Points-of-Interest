@@ -1,4 +1,4 @@
-package poi.michael.pointsofinterest;
+package poi.michael.pointsofinterest.activities;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -29,6 +29,10 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import poi.michael.pointsofinterest.utils.APIRequests;
+import poi.michael.pointsofinterest.models.NamedLocation;
+import poi.michael.pointsofinterest.R;
 
 public class MapActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -266,7 +270,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     }
 
     private void viewSavedPois() {
-        Intent SavedPOIsIntent = new Intent(MapActivity.this, SavedPois.class);
+        Intent SavedPOIsIntent = new Intent(MapActivity.this, SavedPoisActivity.class);
         MapActivity.this.startActivity(SavedPOIsIntent);
     }
 

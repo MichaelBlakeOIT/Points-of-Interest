@@ -1,4 +1,4 @@
-package poi.michael.pointsofinterest;
+package poi.michael.pointsofinterest.models;
 
 import com.google.android.gms.maps.model.LatLng;
 
@@ -6,7 +6,7 @@ import com.google.android.gms.maps.model.LatLng;
  * Created by micha on 2/26/2018.
  */
 
-class NamedLocation {
+public class NamedLocation {
 
     private String mName;
     private LatLng mLocation;
@@ -16,13 +16,13 @@ class NamedLocation {
     private String mDescription;
     private String mUsername;
 
-    NamedLocation(String name, LatLng location, int poi_id) {
+    public NamedLocation(String name, LatLng location, int poi_id) {
         this.mName = name;
         this.mLocation = location;
         this.mPoiId = poi_id;
     }
 
-    NamedLocation(String name, LatLng location, int poi_id, int userId, float rating, String description, String username) {
+    public NamedLocation(String name, LatLng location, int poi_id, int userId, float rating, String description, String username) {
         this.mName = name;
         this.mLocation = location;
         this.mPoiId = poi_id;
@@ -32,31 +32,31 @@ class NamedLocation {
         this.mUsername = username;
     }
 
-    String getName() {
+    public String getName() {
         return mName;
     }
 
-    LatLng getLocation() {
+    public LatLng getLocation() {
         return mLocation;
     }
 
-    int getPoiId() {
+    public int getPoiId() {
         return mPoiId;
     }
 
-    int getUserId() {
+    public int getUserId() {
         return mUserId;
     }
 
-    float getRating() {
+    public float getRating() {
         return mRating;
     }
 
-    String getDescription() {
+    public String getDescription() {
         return mDescription;
     }
 
-    String getUsername() {
+    public String getUsername() {
         return mUsername;
     }
 }

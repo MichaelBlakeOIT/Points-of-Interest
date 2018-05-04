@@ -1,4 +1,4 @@
-package poi.michael.pointsofinterest;
+package poi.michael.pointsofinterest.activities;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -9,6 +9,9 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import poi.michael.pointsofinterest.utils.APIRequests;
+import poi.michael.pointsofinterest.R;
 
 public class SignupActivity extends Activity {
 

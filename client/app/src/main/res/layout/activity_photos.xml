@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:gravity="center"
     android:orientation="vertical"
-    tools:context="poi.michael.pointsofinterest.PhotosActivity">
+    tools:context="poi.michael.pointsofinterest.activities.PhotosActivity">
 
     <ListView
         android:id="@+id/photos_list"

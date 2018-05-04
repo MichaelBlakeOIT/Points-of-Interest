@@ -1,4 +1,4 @@
-package poi.michael.pointsofinterest;
+package poi.michael.pointsofinterest.activities;
 
 import android.app.Activity;
 import android.content.Context;
@@ -17,6 +17,10 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import poi.michael.pointsofinterest.utils.APIRequests;
+import poi.michael.pointsofinterest.models.Comment;
+import poi.michael.pointsofinterest.R;
 
 public class CommentActivity extends Activity {
     private RecyclerView mRecyclerView;
