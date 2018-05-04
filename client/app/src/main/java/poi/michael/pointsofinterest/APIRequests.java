@@ -4,8 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -13,6 +11,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.List;
 
 import okhttp3.FormBody;
 import okhttp3.OkHttpClient;
@@ -109,11 +108,7 @@ public class APIRequests {
 
             JSONObject JSONResponse = new JSONObject(json_string);
 
-            if (!JSONResponse.getBoolean("success")) {
-                return false;
-            }
-
-            return true;
+            return JSONResponse.getBoolean("success");
         } catch (IOException | JSONException e) {
             e.printStackTrace();
             return false;
@@ -174,6 +169,79 @@ public class APIRequests {
             }
 
             return locations;
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    boolean makeComment(int poiId, String commentText) {
+        String url = base_api_url + "poi/" + poiId + "/comments";
+
+        RequestBody formBody = new FormBody.Builder()
+                .add("comment", commentText)
+                .build();
+
+        Request request = new Request.Builder()
+                .url(url)
+                .addHeader("Authorization", getBearerToken())
+                .post(formBody)
+                .build();
+        try {
+            Response response = client.newCall(request).execute();
+
+            if(!response.isSuccessful()) {
+                return false;
+            }
+
+            String json_string = response.body().string();
+
+            JSONObject JSONResponse = new JSONObject(json_string);
+
+            return JSONResponse.getBoolean("success");
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    List<Comment> getComments(int poiId) {
+        String url = base_api_url + "poi/" + poiId + "/comments";
+        List<Comment> list_comments = new ArrayList<>();
+
+        Request request = new Request.Builder()
+                .url(url)
+                .addHeader("Authorization", getBearerToken())
+                .build();
+        try {
+            Response response = client.newCall(request).execute();
+            ArrayList<Comment> comments = new ArrayList<>();
+
+            if(!response.isSuccessful()) {
+                return null;
+            }
+
+            String json_string = response.body().string();
+
+            JSONObject JSONResponse = new JSONObject(json_string);
+
+            if (!JSONResponse.getBoolean("success")) {
+                return null;
+            }
+
+            JSONArray comments_json = JSONResponse.getJSONArray("data");
+
+            for(int i = 0; i < comments_json.length(); i++) {
+                JSONObject comment = comments_json.getJSONObject(i);
+                String commentText = comment.getString("comment");
+                int commentId = comment.getInt("comment_id");
+                int userId = comment.getInt("user_id");
+                String username = comment.getString("username");
+
+                list_comments.add(new Comment(commentText, userId, poiId, commentId, username));
+            }
+
+            return list_comments;
         } catch (IOException | JSONException e) {
             e.printStackTrace();
             return null;

@@ -87,7 +87,7 @@ public class LoginActivity extends Activity {
                 SharedPreferences.Editor editor = sharedPref.edit();
 
                 editor.putString("token", token);
-                //editor.putString("username", mUsername); TODO: Add username somewhere else
+                editor.putString("username", mUsernameView.getText().toString());
                 editor.apply();
 
                 Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_SHORT).show();
