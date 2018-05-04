@@ -82,7 +82,7 @@ public class SignupActivity extends Activity {
             String last_name = params[3];
             String email = params[4];
 
-            boolean success = new APIRequests().register(username, password, first_name, last_name, email);
+            boolean success = new APIRequests(getApplicationContext()).register(username, password, first_name, last_name, email);
 
             return success;
         }

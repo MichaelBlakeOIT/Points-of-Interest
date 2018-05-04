@@ -31,17 +31,21 @@ import java.util.Map;
 public class LoginActivity extends Activity {
     private AutoCompleteTextView mUsernameView;
     private EditText mPasswordView;
+    private Button mSignInButton;
+    private TextView mRegisterTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        Button mSignInButton = (Button) findViewById(R.id.sign_in_button);
-        TextView RegisterTextView = (TextView) findViewById(R.id.registerSelect);
+        mSignInButton = (Button) findViewById(R.id.sign_in_button);
+        mRegisterTextView = (TextView) findViewById(R.id.registerSelect);
+        mUsernameView = (AutoCompleteTextView) findViewById(R.id.UsernameLoginField);
+        mPasswordView = (EditText) findViewById(R.id.passwordLoginField);
 
         mSignInButton.setOnClickListener(mSignInButtonListener);
-        RegisterTextView.setOnClickListener(mRegisterSelectListener);
+        mRegisterTextView.setOnClickListener(mRegisterSelectListener);
 
         checkToken();
     }
@@ -50,9 +54,6 @@ public class LoginActivity extends Activity {
     {
         public void onClick(View v)
         {
-            mUsernameView = (AutoCompleteTextView) findViewById(R.id.UsernameLoginField);
-            mPasswordView = (EditText) findViewById(R.id.passwordLoginField);
-
             String username = mUsernameView.getText().toString();
             String password = mPasswordView.getText().toString();
 
@@ -88,7 +89,7 @@ public class LoginActivity extends Activity {
             String username = params[0];
             String password = params[1];
 
-            String response = new APIRequests().login(username, password);
+            String response = new APIRequests(getApplicationContext()).login(username, password);
 
             return response;
         }
@@ -100,7 +101,7 @@ public class LoginActivity extends Activity {
                 SharedPreferences.Editor editor = sharedPref.edit();
 
                 editor.putString("token", token);
-                //editor.putString("username", mUsername); TODO: Add username somewewhere else
+                //editor.putString("username", mUsername); TODO: Add username somewhere else
                 editor.apply();
 
                 Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_SHORT).show();

@@ -1,31 +1,24 @@
 package poi.michael.pointsofinterest;
 
-import android.Manifest;
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.AsyncTask;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.CheckBox;
 
-import com.android.volley.AuthFailureError;
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -34,19 +27,16 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.math.BigDecimal;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class MapActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
     private LocationManager mLocationManager;
+    private Toolbar mToolbar;
+    private CheckBox mCheckbox;
+    private View mFloatingButton;
     public static final int CREATE_POI_REQUEST = 2;
 
     @Override
@@ -54,17 +44,17 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
 
-        final Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
-        final CheckBox checkbox = (CheckBox) findViewById(R.id.checkBox);
-        final View button = findViewById(R.id.new_poi);
+        mToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        mCheckbox = (CheckBox) findViewById(R.id.checkBox);
+        mFloatingButton = findViewById(R.id.new_poi);
 
-        setSupportActionBar(myToolbar);
+        setSupportActionBar(mToolbar);
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        button.setOnClickListener(new View.OnClickListener() {
+        mFloatingButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 Location location = getLastKnownLocation();
 
@@ -75,10 +65,10 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             }
         });
 
-        checkbox.setOnClickListener(new View.OnClickListener() {
+        mCheckbox.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (checkbox.isChecked() && mMap != null) {
+                if (mCheckbox.isChecked() && mMap != null) {
                     mMap.clear();
                     new loadPoints(true).execute();
                 }
@@ -141,78 +131,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         }
     }
 
-    /*private void StartLocationTracking()
-    {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
-        }
-        if(mLocationManager.isProviderEnabled(mLocationManager.NETWORK_PROVIDER)) {
-            mLocationManager.requestLocationUpdates(mLocationManager.NETWORK_PROVIDER, 2, 2000, new LocationListener() {
-                @Override
-                public void onLocationChanged(Location location) {
-                    double latitude = location.getLatitude();
-                    double longitude = location.getLongitude();
-                    mUserLocation = new LatLng(latitude, longitude);
-                    //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLong, 15f));
-                }
-
-                @Override
-                public void onStatusChanged(String provider, int status, Bundle extras) {
-
-                }
-
-                @Override
-                public void onProviderEnabled(String provider) {
-
-                }
-
-                @Override
-                public void onProviderDisabled(String provider) {
-
-                }
-            });
-        }
-        else if(mLocationManager.isProviderEnabled(mLocationManager.GPS_PROVIDER))
-        {
-            mLocationManager.requestLocationUpdates(mLocationManager.GPS_PROVIDER, 0, 0, new LocationListener() {
-                @Override
-                public void onLocationChanged(Location location) {
-                    double latitude;
-                    double longitude;
-
-                    if(location != null) {
-                        latitude = location.getLatitude();
-                        longitude = location.getLongitude();
-                        LatLng latLong = new LatLng(latitude, longitude);
-                    }
-                    //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLong, 15f));
-                }
-
-                @Override
-                public void onStatusChanged(String provider, int status, Bundle extras) {
-
-                }
-
-                @Override
-                public void onProviderEnabled(String provider) {
-
-                }
-
-                @Override
-                public void onProviderDisabled(String provider) {
-
-                }
-            });
-        }
-    }*/
-
     /**
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
@@ -258,106 +176,71 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         return bestLocation;
     }
 
-    private class loadPoints extends AsyncTask<Void, Void, Boolean> {
-        private Context mContext;
+    private class loadPoints extends AsyncTask<Void, Void, ArrayList<NamedLocation>> {
+        private View.OnClickListener mSnackbarClickListener;
         private boolean mOnlyFollowed;
         loadPoints(boolean onlyFollowed) {
             mOnlyFollowed = onlyFollowed;
         }
 
         @Override
-        protected Boolean doInBackground(Void... params) {
-            String url;
-            if(mOnlyFollowed)
-                url = getResources().getString(R.string.base_url) + "/users/following";
+        protected ArrayList<NamedLocation> doInBackground(Void... params) {
+            ArrayList<NamedLocation> POIs;
+
+            if (mOnlyFollowed)
+                POIs = new APIRequests(getApplicationContext()).getPOIs(true);
             else
-                url = getResources().getString(R.string.base_url) + "/poi";
-            mContext = getApplicationContext();
+                POIs = new APIRequests(getApplicationContext()).getPOIs(false);
 
-            StringRequest postRequest = new StringRequest(Request.Method.GET, url,
-                    new Response.Listener<String>() {
-                        @Override
-                        public void onResponse(String response) {
-                            // response
-                            try {
-                                JSONObject JSONResponse = new JSONObject(response);
+            return POIs;
+        }
 
-                                JSONArray POIs = JSONResponse.getJSONArray("data");
+        @Override
+        protected void onPostExecute(final ArrayList<NamedLocation> points) {
 
-                                for(int i = 0; i < POIs.length(); i++) {
-                                    JSONObject POI = POIs.getJSONObject(i);
-                                    Double lat = POI.getDouble("lat");
-                                    Double _long = POI.getDouble("long");
-                                    String title = POI.getString("title");
-                                    String description = POI.getString("description");
-                                    int userId = POI.getInt("user_id");
-                                    int poiId = POI.getInt("pio_id");
-                                    String username = POI.getString("username");
-                                    Float rating = BigDecimal.valueOf(POI.getDouble("rating")).floatValue();
+            //on successful retrieval of POIs
+            if (points != null) {
+                Marker marker;
 
-                                    //MarkerInfo info = new MarkerInfo(lat, _long, title, description, userId, poiId, username, (float)5);
-                                    //MarkerInfo info = new MarkerInfo(lat, _long, title, description, userId, poiId, username, rating);
-                                    NamedLocation poi = new NamedLocation(title, new LatLng(lat, _long), poiId, userId, rating, description, username);
+                mFloatingButton.setVisibility(View.VISIBLE);
 
-                                    //Marker marker = mMap.addMarker(new MarkerOptions().position(new LatLng(lat, _long)).title(title));
-                                    Marker marker = mMap.addMarker(new MarkerOptions().position(poi.getLocation()).title(poi.getName()));
+                for(NamedLocation poi: points) {
+                    marker = mMap.addMarker(new MarkerOptions().position(poi.getLocation()).title(poi.getName()));
 
-                                    marker.setTag(poi);
-                                }
-
-                                mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-                                    @Override
-                                    public boolean onMarkerClick(Marker marker) {
-                                        //MarkerInfo info = (MarkerInfo)marker.getTag();
-                                        NamedLocation info = (NamedLocation) marker.getTag();
-                                        Intent POIActivityIntent = new Intent(MapActivity.this, POIActivity.class);
-
-                                        POIActivityIntent.putExtra("title", info.getName());
-                                        POIActivityIntent.putExtra("description", info.getDescription());
-                                        POIActivityIntent.putExtra("username", info.getUsername());
-                                        POIActivityIntent.putExtra("id", info.getPoiId());
-                                        POIActivityIntent.putExtra("rating", info.getRating());
-                                        POIActivityIntent.putExtra("Location", info.getLocation());
-
-                                        MapActivity.this.startActivity(POIActivityIntent);
-                                        return false;
-                                    }
-                                });
-
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    },
-                    new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            Log.d("Error.Response", error.toString());
-                        }
-                    }
-            ) {
-
-                @Override
-                public Map<String, String> getHeaders() throws AuthFailureError {
-                    SharedPreferences sharedPref = getSharedPreferences(getString(R.string.user_token), Context.MODE_PRIVATE);
-
-                    Map<String, String> params = new HashMap<String, String>();
-                    params.put("Authorization", "Bearer " + sharedPref.getString("token", ""));
-
-                    return params;
+                    marker.setTag(poi);
                 }
-            };
-            volleySingleton.getInstance(mContext).getRequestQueue().add(postRequest);
-            return true;
-        }
 
-        @Override
-        protected void onPostExecute(final Boolean success) {
-        }
+                mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+                    @Override
+                    public boolean onMarkerClick(Marker marker) {
+                        NamedLocation info = (NamedLocation) marker.getTag();
+                        Intent POIActivityIntent = new Intent(MapActivity.this, POIActivity.class);
 
-        @Override
-        protected void onCancelled() {
+                        POIActivityIntent.putExtra("title", info.getName());
+                        POIActivityIntent.putExtra("description", info.getDescription());
+                        POIActivityIntent.putExtra("username", info.getUsername());
+                        POIActivityIntent.putExtra("id", info.getPoiId());
+                        POIActivityIntent.putExtra("rating", info.getRating());
+                        POIActivityIntent.putExtra("Location", info.getLocation());
 
+                        MapActivity.this.startActivity(POIActivityIntent);
+                        return false;
+                    }
+                });
+            }
+            //error retrieving points
+            else {
+                mSnackbarClickListener = new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        new loadPoints(false).execute();
+                    }
+                };
+
+                Snackbar.make(findViewById(android.R.id.content), "Error loading points", Snackbar.LENGTH_INDEFINITE)
+                        .setAction("Retry", mSnackbarClickListener)
+                        .show();
+            }
         }
     }
 

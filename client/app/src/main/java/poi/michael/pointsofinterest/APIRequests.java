@@ -1,9 +1,18 @@
 package poi.michael.pointsofinterest;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.ArrayList;
 
 import okhttp3.FormBody;
 import okhttp3.OkHttpClient;
@@ -18,7 +27,19 @@ import okhttp3.Response;
 
 public class APIRequests {
     private final String base_api_url = "https://points-of-interest.herokuapp.com/";
+    private Context mContext;
     private OkHttpClient client = new OkHttpClient();
+
+    APIRequests(Context context) {
+        mContext = context;
+    }
+
+    /**
+     * Created by michael on 4/17/2018.
+     * API request for logging into an account.
+     *
+     * Returns auth token
+     */
 
     String login(String username, String password) {
         String url = base_api_url + "session";
@@ -44,7 +65,7 @@ public class APIRequests {
             JSONObject JSONResponse = new JSONObject(json_string);
 
             if (!JSONResponse.getBoolean("success")) {
-                //invalid login (probably)
+                //invalid login (probably) TODO: handle other errors
                 return null;
             }
 
@@ -54,6 +75,13 @@ public class APIRequests {
             return null;
         }
     }
+
+    /**
+     * Created by michael on 4/17/2018.
+     * API request for registering a new account.
+     *
+     * Retuns true on successful sign up, false otherwise.
+     */
 
     boolean register(String username, String password, String first_name, String last_name, String email) {
         String url = base_api_url + "users";
@@ -90,5 +118,71 @@ public class APIRequests {
             e.printStackTrace();
             return false;
         }
+    }
+
+    /**
+     * Created by michael on 4/17/2018.
+     * Get list of POIs
+     *
+     * returns ArrayList of NamedLocations
+     */
+
+    ArrayList<NamedLocation> getPOIs(boolean followed_only) {
+        String url = base_api_url;
+
+        if(followed_only)
+            url += "users/following";
+        else
+            url += "poi";
+
+        Request request = new Request.Builder()
+                .url(url)
+                .addHeader("Authorization", getBearerToken())
+                .build();
+        try {
+            Response response = client.newCall(request).execute();
+            ArrayList<NamedLocation> locations = new ArrayList<>();
+
+            if(!response.isSuccessful()) {
+                return null;
+            }
+
+            String json_string = response.body().string();
+
+            JSONObject JSONResponse = new JSONObject(json_string);
+
+            if (!JSONResponse.getBoolean("success")) {
+                return null;
+            }
+
+            JSONArray POIs = JSONResponse.getJSONArray("data");
+
+            for(int i = 0; i < POIs.length(); i++) {
+                JSONObject POI = POIs.getJSONObject(i);
+                Double lat = POI.getDouble("lat");
+                Double _long = POI.getDouble("long");
+                String title = POI.getString("title");
+                String description = POI.getString("description");
+                int userId = POI.getInt("user_id");
+                int poiId = POI.getInt("pio_id");
+                String username = POI.getString("username");
+                Float rating = BigDecimal.valueOf(POI.getDouble("rating")).floatValue();
+
+                NamedLocation poi = new NamedLocation(title, new LatLng(lat, _long), poiId, userId, rating, description, username);
+
+                locations.add(poi);
+            }
+
+            return locations;
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private String getBearerToken() {
+        SharedPreferences sharedPref = mContext.getSharedPreferences(mContext.getString(R.string.user_token), Context.MODE_PRIVATE);
+
+        return "Bearer " + sharedPref.getString("token", "");
     }
 }
