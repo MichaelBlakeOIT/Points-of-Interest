@@ -7,9 +7,9 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
-import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -30,9 +30,9 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import java.util.ArrayList;
 import java.util.List;
 
-import poi.michael.pointsofinterest.utils.APIRequests;
-import poi.michael.pointsofinterest.models.NamedLocation;
 import poi.michael.pointsofinterest.R;
+import poi.michael.pointsofinterest.models.NamedLocation;
+import poi.michael.pointsofinterest.utils.APIRequests;
 
 public class MapActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -192,9 +192,9 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             ArrayList<NamedLocation> POIs;
 
             if (mOnlyFollowed)
-                POIs = new APIRequests(getApplicationContext()).getPOIs(true);
+                POIs = new APIRequests(getApplicationContext()).getPOIs(APIRequests.PoiChoices.FOLLOWING);
             else
-                POIs = new APIRequests(getApplicationContext()).getPOIs(false);
+                POIs = new APIRequests(getApplicationContext()).getPOIs(APIRequests.PoiChoices.ALL);
 
             return POIs;
         }

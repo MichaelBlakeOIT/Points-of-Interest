@@ -3,43 +3,29 @@ package poi.michael.pointsofinterest.activities;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.android.volley.AuthFailureError;
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import poi.michael.pointsofinterest.models.NamedLocation;
 import poi.michael.pointsofinterest.R;
-import poi.michael.pointsofinterest.utils.volleySingleton;
+import poi.michael.pointsofinterest.utils.APIRequests;
 
 public class FeedActivity extends Activity {
     private RecyclerView mRecyclerView;
@@ -166,67 +152,28 @@ public class FeedActivity extends Activity {
         }
     }
 
-    private class GetSavedPOIsTask extends AsyncTask<Void, Void, Boolean> {
-        private Context mContext;
+    private class GetSavedPOIsTask extends AsyncTask<Void, Void, List<NamedLocation>> {
+        @Override
+        protected List<NamedLocation> doInBackground(Void... params) {
+            ArrayList<NamedLocation> POIs;
+
+            POIs = new APIRequests(getApplicationContext()).getPOIs(APIRequests.PoiChoices.FOLLOWING);
+
+            return POIs;
+        }
 
         @Override
-        protected Boolean doInBackground(Void... params) {
-            String url = getResources().getString(R.string.base_url) + "/users/following";
+        protected void onPostExecute(final List<NamedLocation> points) {
 
-            mContext = getApplicationContext();
-
-            StringRequest saveRequest = new StringRequest(Request.Method.GET, url,
-                    new Response.Listener<String>() {
-                        @Override
-                        public void onResponse(String response) {
-                            // response
-                            try {
-                                JSONObject JSONResponse = new JSONObject(response);
-
-                                JSONArray POIs = JSONResponse.getJSONArray("data");
-
-                                for(int i = 0; i < POIs.length(); i++) {
-                                    JSONObject POI = POIs.getJSONObject(i);
-                                    Double lat = POI.getDouble("lat");
-                                    Double _long = POI.getDouble("long");
-                                    String title = POI.getString("title");
-                                    String description = POI.getString("description");
-                                    int userId = POI.getInt("user_id");
-                                    int poi_id = POI.getInt("pio_id");
-                                    String username = POI.getString("username");
-
-                                    list_locations.add(new NamedLocation(title, new LatLng(lat, _long), poi_id));
-                                }
-
-                                mRecyclerView = (RecyclerView) findViewById(R.id.following_feed);
-                                mRecyclerView.setHasFixedSize(true);
-                                mRecyclerView.setLayoutManager(mLinearLayoutManager);
-                                mRecyclerView.setAdapter(new MapAdapter(list_locations));
-                                mRecyclerView.setRecyclerListener(mRecycleListener);
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    },
-                    new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            Log.d("Error.Response", error.toString());
-                        }
-                    }
-            ) {
-                @Override
-                public Map<String, String> getHeaders() throws AuthFailureError {
-                    SharedPreferences sharedPref = getSharedPreferences(getString(R.string.user_token), Context.MODE_PRIVATE);
-
-                    Map<String, String> params = new HashMap<String, String>();
-                    params.put("Authorization", "Bearer " + sharedPref.getString("token", ""));
-
-                    return params;
-                }
-            };
-            volleySingleton.getInstance(mContext).getRequestQueue().add(saveRequest);
-            return true;
+            //on successful retrieval of POIs
+            if (points != null) {
+                //populate list
+                mRecyclerView = (RecyclerView) findViewById(R.id.following_feed);
+                mRecyclerView.setHasFixedSize(true);
+                mRecyclerView.setLayoutManager(mLinearLayoutManager);
+                mRecyclerView.setAdapter(new MapAdapter(points));
+                mRecyclerView.setRecyclerListener(mRecycleListener);
+            }
         }
     }
 

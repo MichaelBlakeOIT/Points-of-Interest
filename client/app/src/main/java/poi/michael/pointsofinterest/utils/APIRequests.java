@@ -32,6 +32,10 @@ public class APIRequests {
     private Context mContext;
     private OkHttpClient client = new OkHttpClient();
 
+    public enum PoiChoices {
+            ALL, FOLLOWING, SAVED
+    }
+
     public APIRequests(Context context) {
         mContext = context;
     }
@@ -125,13 +129,20 @@ public class APIRequests {
      * returns ArrayList of NamedLocations
      */
 
-    public ArrayList<NamedLocation> getPOIs(boolean followed_only) {
+    public ArrayList<NamedLocation> getPOIs(PoiChoices poiType) {
         String url = base_api_url;
 
-        if(followed_only)
-            url += "users/following";
-        else
-            url += "poi";
+        switch (poiType) {
+            case ALL:
+                url += "poi";
+                break;
+            case FOLLOWING:
+                url += "users/pois/following";
+                break;
+            case SAVED:
+                url += "users/pois/saved";
+                break;
+        }
 
         Request request = new Request.Builder()
                 .url(url)

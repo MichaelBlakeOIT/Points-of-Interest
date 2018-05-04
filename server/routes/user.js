@@ -242,7 +242,7 @@ router.get('/pois/saved', requireAuth, function (req, res) {
 });
 
 
-router.get('/following', requireAuth, function (req, res) {
+router.get('/pois/following', requireAuth, function (req, res) {
     var getPOIs = `SELECT users.user_id, username, point_of_interests.user_id, pio_id, ST_X(coordinates) AS "lat", ST_Y(coordinates) AS "long", title, description,  IFNULL((SELECT AVG(rating) FROM pio_ratings WHERE poi_id = point_of_interests.pio_id), 0) as rating
     FROM point_of_interests 
     INNER JOIN following ON point_of_interests.user_id = following_id
