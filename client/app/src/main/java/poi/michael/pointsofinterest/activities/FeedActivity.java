@@ -1,7 +1,6 @@
 package poi.michael.pointsofinterest.activities;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -29,10 +28,7 @@ import poi.michael.pointsofinterest.utils.APIRequests;
 
 public class FeedActivity extends Activity {
     private RecyclerView mRecyclerView;
-
     private LinearLayoutManager mLinearLayoutManager;
-
-    private List<NamedLocation> list_locations = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

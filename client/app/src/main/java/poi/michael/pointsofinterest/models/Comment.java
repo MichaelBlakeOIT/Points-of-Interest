@@ -1,41 +1,58 @@
 package poi.michael.pointsofinterest.models;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
 /**
  * Created by micha on 3/12/2018.
  */
 
 public class Comment {
-    private String m_comment;
-    private int m_user_id;
-    private int m_poi_id;
-    private int m_comment_id;
-    private String m_username;
+    @SerializedName("comment")
+    @Expose
+    private String mComment;
+
+    @SerializedName("user_id")
+    @Expose
+    private int mUserId;
+
+    @SerializedName("point_of_interest_id")
+    @Expose
+    private int mPoiId;
+
+    @SerializedName("comment_id")
+    @Expose
+    private int mCommentId;
+
+    @SerializedName("username")
+    @Expose
+    private String mUsername;
 
     public Comment(String comment, int user_id, int poi_id, int comment_id, String username) {
-        m_comment = comment;
-        m_comment_id = comment_id;
-        m_user_id = user_id;
-        m_username = username;
-        m_poi_id = poi_id;
+        mComment = comment;
+        mCommentId = comment_id;
+        mUserId = user_id;
+        mUsername = username;
+        mPoiId = poi_id;
     }
 
     public String getComment() {
-        return m_comment;
+        return mComment;
     }
 
     public int getPoiId() {
-        return m_poi_id;
+        return mPoiId;
     }
 
     public String getUsername() {
-        return m_username;
+        return mUsername;
     }
 
     public int getCommentId() {
-        return m_comment_id;
+        return mCommentId;
     }
 
     public int getUserId() {
-        return m_user_id;
+        return mUserId;
     }
 }

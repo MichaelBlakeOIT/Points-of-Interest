@@ -1,5 +1,6 @@
 package poi.michael.pointsofinterest.activities;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -13,12 +14,15 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.CheckBox;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -33,15 +37,22 @@ import java.util.List;
 import poi.michael.pointsofinterest.R;
 import poi.michael.pointsofinterest.models.NamedLocation;
 import poi.michael.pointsofinterest.utils.APIRequests;
+import poi.michael.pointsofinterest.utils.MapTools;
 
 public class MapActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
     private LocationManager mLocationManager;
+    private FusedLocationProviderClient mFusedLocationProviderClient;
     private Toolbar mToolbar;
     private CheckBox mCheckbox;
     private View mFloatingButton;
+    private Location mLastKnownLocation;
     public static final int CREATE_POI_REQUEST = 2;
+    private View.OnClickListener mSnackbarClickListener;
+    private View.OnClickListener mSnackbarNoLocationListener;
+    private MapTools.LocationHelper mLocationHelper;
+    private static final String TAG = MapActivity.class.getName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +68,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
         mFloatingButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -75,13 +88,26 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 if (mCheckbox.isChecked() && mMap != null) {
                     mMap.clear();
                     new loadPoints(true).execute();
-                }
-                else if (mMap != null) {
+                } else if (mMap != null) {
                     mMap.clear();
                     new loadPoints(false).execute();
                 }
             }
         });
+
+        mSnackbarClickListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new loadPoints(false).execute();
+            }
+        };
+
+        mSnackbarNoLocationListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mLocationHelper.getCurrentLocation();
+            }
+        };
 
         new loadPoints(false).execute();
     }
@@ -137,9 +163,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     /**
      * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
      * If Google Play services is not installed on the device, the user will be prompted to install
      * it inside the SupportMapFragment. This method will only be triggered once the user has
      * installed Google Play services and returned to the app.
@@ -148,16 +171,45 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        Location location = getLastKnownLocation();
-        LatLng coordinate = null;
+        mLocationHelper = new MapTools().getLocationHelper(this,
+                new MapTools.LocationListener() {
+                    @Override
+                    public void onLocationRetrieved(Location location) {
+                        mLastKnownLocation = location;
 
-        if(location != null) {
-            coordinate = new LatLng(location.getLatitude(), location.getLongitude());
-        }
+                        mFloatingButton.setVisibility(View.VISIBLE);
 
-        if(coordinate != null) {
-            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(coordinate, 15));
+                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                                new LatLng(mLastKnownLocation.getLatitude(),
+                                        mLastKnownLocation.getLongitude()), 15));
+                    }
+
+                    @Override
+                    public void onNullLocation() {
+                        Snackbar.make(findViewById(android.R.id.content), "Error retrieving location", Snackbar.LENGTH_INDEFINITE)
+                                .setAction("Retry", mSnackbarNoLocationListener)
+                                .show();
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        Log.e(TAG, e.toString());
+                    }
+        });
+
+        mLocationHelper.getCurrentLocation();
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
         }
+        mMap.setMyLocationEnabled(true);
     }
 
     private Location getLastKnownLocation() {
@@ -181,7 +233,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     }
 
     private class loadPoints extends AsyncTask<Void, Void, ArrayList<NamedLocation>> {
-        private View.OnClickListener mSnackbarClickListener;
         private boolean mOnlyFollowed;
         loadPoints(boolean onlyFollowed) {
             mOnlyFollowed = onlyFollowed;
@@ -205,8 +256,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             //on successful retrieval of POIs
             if (points != null) {
                 Marker marker;
-
-                mFloatingButton.setVisibility(View.VISIBLE);
 
                 for(NamedLocation poi: points) {
                     marker = mMap.addMarker(new MarkerOptions().position(poi.getLocation()).title(poi.getName()));
@@ -234,13 +283,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             }
             //error retrieving points
             else {
-                mSnackbarClickListener = new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        new loadPoints(false).execute();
-                    }
-                };
-
                 Snackbar.make(findViewById(android.R.id.content), "Error loading points", Snackbar.LENGTH_INDEFINITE)
                         .setAction("Retry", mSnackbarClickListener)
                         .show();

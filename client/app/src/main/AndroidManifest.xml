@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="poi.michael.pointsofinterest">
+    package="poi.michael.pointsofinterest"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <!-- To auto-complete the email text field in the login form with the user's emails -->
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
@@ -24,7 +25,9 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+        android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+        android:value="@integer/google_play_services_version"
+        tools:node="replace">
         <activity
             android:name=".activities.LoginActivity"
             android:label="@string/app_name">
@@ -45,7 +48,11 @@
         -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyBjVxADBs9dc6YXbxn7gpnUX8ZLjIFHi2s" />
+            android:value="AIzaSyBjVxADBs9dc6YXbxn7gpnUX8ZLjIFHi2s"/>
+
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
 
         <activity
             android:name=".activities.MapActivity"
@@ -54,7 +61,6 @@
         <activity android:name=".activities.ProfileActivity" />
         <activity android:name=".activities.POIActivity" />
         <activity android:name=".activities.SettingsActivity" />
-        <activity android:name=".activities.SavedPois" />
 
         <service
             android:name="com.amazonaws.mobileconnectors.s3.transferutility.TransferService"
@@ -74,7 +80,7 @@
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths"></meta-data>
+                android:resource="@xml/file_paths"/>
         </provider>
 
     </application>

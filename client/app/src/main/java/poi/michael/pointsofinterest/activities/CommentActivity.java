@@ -18,9 +18,13 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
+import poi.michael.pointsofinterest.interfaces.APIInterface;
+import poi.michael.pointsofinterest.models.Response;
 import poi.michael.pointsofinterest.utils.APIRequests;
 import poi.michael.pointsofinterest.models.Comment;
 import poi.michael.pointsofinterest.R;
+import retrofit2.Call;
+import retrofit2.Callback;
 
 public class CommentActivity extends Activity {
     private RecyclerView mRecyclerView;
@@ -41,7 +45,59 @@ public class CommentActivity extends Activity {
 
         mLinearLayoutManager = new LinearLayoutManager(this);
 
-        new GetCommentsTask().execute();
+        loadComments();
+    }
+
+    private void loadComments() {
+        SharedPreferences sharedPref = getSharedPreferences(getString(R.string.user_token), Context.MODE_PRIVATE);
+        String token = "Bearer " + sharedPref.getString("token", "");
+
+        APIInterface APIInterface = new APIRequests(getApplicationContext()).getInterface();
+        APIInterface.commentList(mPoiId, token).enqueue(new Callback<Response<List<Comment>>>() {
+            @Override
+            public void onResponse(Call<Response<List<Comment>>> call, retrofit2.Response<Response<List<Comment>>> response) {
+                if (response.isSuccessful()) {
+                    mCommentAdapter = new CommentAdapter(response.body().getData());
+
+                    mRecyclerView = findViewById(R.id.comments_recycler_view);
+                    mRecyclerView.setHasFixedSize(true);
+                    mRecyclerView.setLayoutManager(mLinearLayoutManager);
+                    mRecyclerView.setAdapter(mCommentAdapter);
+                }
+                else {
+                    //error
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Response<List<Comment>>> call, Throwable t) {
+                Toast.makeText(getApplicationContext(), "An error occurred", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void createComment(String comment) {
+        SharedPreferences sharedPref = getSharedPreferences(getString(R.string.user_token), Context.MODE_PRIVATE);
+        String token = "Bearer " + sharedPref.getString("token", "");
+
+        APIInterface APIInterface = new APIRequests(getApplicationContext()).getInterface();
+        APIInterface.comment(mPoiId, comment, token).enqueue(new Callback<Response<Comment>>() {
+            @Override
+            public void onResponse(Call<Response<Comment>> call, retrofit2.Response<Response<Comment>> response) {
+                if (response.isSuccessful()) {
+                    SharedPreferences sharedPref = getSharedPreferences(getString(R.string.user_token), Context.MODE_PRIVATE);
+                    String username =  sharedPref.getString("username", "");
+                    mListComments.add(new Comment(response.body().getData().getComment(), 0, mPoiId, 0, username));
+                    mCommentAdapter.notifyDataSetChanged();
+                    mComment.getText().clear();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Response<Comment>> call, Throwable t) {
+                Toast.makeText(getApplicationContext(), "An error occurred", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ViewHolder> {
@@ -81,8 +137,8 @@ public class CommentActivity extends Activity {
             private ViewHolder(View itemView) {
                 super(itemView);
                 layout = itemView;
-                username = (TextView) layout.findViewById(R.id.comment_username);
-                text = (TextView) layout.findViewById(R.id.comment_text);
+                username = layout.findViewById(R.id.comment_username);
+                text = layout.findViewById(R.id.comment_text);
             }
 
             private void bindView(int pos) {
@@ -90,29 +146,6 @@ public class CommentActivity extends Activity {
                 layout.setTag(this);
                 username.setText(item.getUsername());
                 text.setText(item.getComment());
-            }
-        }
-    }
-
-    private class GetCommentsTask extends AsyncTask<Void, Void, List<Comment>> {
-
-        @Override
-        protected List<Comment> doInBackground(Void... params) {
-            mListComments = new APIRequests(getApplicationContext()).getComments(mPoiId);
-            return mListComments;
-        }
-
-        @Override
-        protected void onPostExecute(final List<Comment> comments) {
-            if (comments != null) {
-                mCommentAdapter = new CommentAdapter(comments);
-
-                mRecyclerView = (RecyclerView) findViewById(R.id.comments_recycler_view);
-                mRecyclerView.setHasFixedSize(true);
-                mRecyclerView.setLayoutManager(mLinearLayoutManager);
-                mRecyclerView.setAdapter(mCommentAdapter);
-            } else {
-                Toast.makeText(getApplicationContext(), "An error occurred", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -149,6 +182,7 @@ public class CommentActivity extends Activity {
     }
 
     public void submit(View v) {
-        new CreateCommentTask(mComment.getText().toString()).execute();
+        /*new CreateCommentTask(mComment.getText().toString()).execute();*/
+        createComment(mComment.getText().toString());
     }
 }

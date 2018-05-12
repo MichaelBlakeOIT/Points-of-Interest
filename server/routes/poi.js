@@ -180,6 +180,8 @@ router.post('/:id/comments', requireAuth,
         field("comment").required().minLength(1).maxLength(255)
     ), function (req, res) {
 
+        console.log(req.body); 
+
         if (!req.form.isValid)
             return res.json({ success: false, message: req.form.errors });
 
@@ -190,7 +192,15 @@ router.post('/:id/comments', requireAuth,
                 console.log(err);
                 return res.json({ success: false, message: "Unknown error" });
             }
-            res.json({ success: true, message: "Successfully created comment" });
+            //res.json({ success: true, message: "Successfully created comment" });
+            res.json({ success: true, 
+                data: {
+                    "username": req.user.username,
+                    "comment": req.body.comment,
+                    "point_of_interest_id": req.params.id,
+                    "comment_id": rows.insertId,
+                    "user_id": req.user.user_id
+            }});
         });
 });
 

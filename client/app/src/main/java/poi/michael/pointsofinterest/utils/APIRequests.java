@@ -18,6 +18,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import poi.michael.pointsofinterest.interfaces.APIInterface;
 import poi.michael.pointsofinterest.models.Comment;
 import poi.michael.pointsofinterest.R;
 import poi.michael.pointsofinterest.models.NamedLocation;
@@ -29,6 +30,7 @@ import poi.michael.pointsofinterest.models.NamedLocation;
 
 public class APIRequests {
     private final String base_api_url = "https://points-of-interest.herokuapp.com/";
+    //private final String base_api_url = "https://6270b593-a1b0-4ef8-87dd-11877a1d8397.mock.pstmn.io";
     private Context mContext;
     private OkHttpClient client = new OkHttpClient();
 
@@ -262,9 +264,13 @@ public class APIRequests {
         }
     }
 
-    private String getBearerToken() {
+    public String getBearerToken() {
         SharedPreferences sharedPref = mContext.getSharedPreferences(mContext.getString(R.string.user_token), Context.MODE_PRIVATE);
 
         return "Bearer " + sharedPref.getString("token", "");
+    }
+
+    public APIInterface getInterface() {
+        return RetrofitClient.getClient(base_api_url).create(APIInterface.class);
     }
 }
