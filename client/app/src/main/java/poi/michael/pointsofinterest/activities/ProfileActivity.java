@@ -37,7 +37,6 @@ import poi.michael.pointsofinterest.models.UserResponse;
 import poi.michael.pointsofinterest.utils.APIRequests;
 import poi.michael.pointsofinterest.utils.ImageTools;
 import poi.michael.pointsofinterest.R;
-import poi.michael.pointsofinterest.utils.volleySingleton;
 import retrofit2.Call;
 import retrofit2.Callback;
 
@@ -99,9 +98,7 @@ public class ProfileActivity extends Activity {
                     //        .execute("https://s3.us-east-2.amazonaws.com/points-of-interest/profile_photos/" + mProfileUsername.toLowerCase() + ".jpg");
 
                     username.setText(mProfileUsername);
-                    if(!mBio.matches("null")) {
-                        bio.setText(mBio);
-                    }
+                    bio.setText(mBio);
 
                     if(mFollowing == 1) {
                         mFollowButton.setText("Unfollow User");
