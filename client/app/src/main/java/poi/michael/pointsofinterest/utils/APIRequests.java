@@ -21,7 +21,7 @@ import okhttp3.Response;
 import poi.michael.pointsofinterest.interfaces.APIInterface;
 import poi.michael.pointsofinterest.models.Comment;
 import poi.michael.pointsofinterest.R;
-import poi.michael.pointsofinterest.models.NamedLocation;
+import poi.michael.pointsofinterest.models.POI;
 
 /**
  * Created by michael on 4/17/2018.
@@ -131,7 +131,7 @@ public class APIRequests {
      * returns ArrayList of NamedLocations
      */
 
-    public ArrayList<NamedLocation> getPOIs(PoiChoices poiType) {
+    public ArrayList<POI> getPOIs(PoiChoices poiType) {
         String url = base_api_url;
 
         switch (poiType) {
@@ -152,7 +152,7 @@ public class APIRequests {
                 .build();
         try {
             Response response = client.newCall(request).execute();
-            ArrayList<NamedLocation> locations = new ArrayList<>();
+            ArrayList<POI> locations = new ArrayList<>();
 
             if(!response.isSuccessful()) {
                 return null;
@@ -179,7 +179,7 @@ public class APIRequests {
                 String username = POI.getString("username");
                 Float rating = BigDecimal.valueOf(POI.getDouble("rating")).floatValue();
 
-                NamedLocation poi = new NamedLocation(title, new LatLng(lat, _long), poiId, userId, rating, description, username);
+                poi.michael.pointsofinterest.models.POI poi = new POI(title, lat, _long, poiId, userId, rating, description, username);
 
                 locations.add(poi);
             }

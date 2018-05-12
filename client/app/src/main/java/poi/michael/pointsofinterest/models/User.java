@@ -1,5 +1,6 @@
 package poi.michael.pointsofinterest.models;
 
+import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 /**
@@ -7,23 +8,33 @@ import com.google.gson.annotations.SerializedName;
  */
 
 public class User {
+    @Expose
     @SerializedName("user_id")
     private int mUserId;
 
+    @Expose
     @SerializedName("username")
     private String mUsername;
 
+    @Expose
     @SerializedName("first_name")
     private String mFirstName;
 
+    @Expose
     @SerializedName("last_name")
     private String mLastName;
 
+    @Expose
     @SerializedName("bio")
     private String mBio;
 
+    @Expose
     @SerializedName("profile_photo")
     private int mHasProfilePicture;
+
+    @Expose
+    @SerializedName("following")
+    private int mIsFollowing;
 
     public User(int mUserId, String mUsername, String mFirstName, String mLastName, String mBio, int mHasProfilePicture) {
         this.mUserId = mUserId;
@@ -41,51 +52,57 @@ public class User {
         this.mLastName = mLastName;
     }
 
-    public int getmUserId() {
+    public int getUserId() {
         return mUserId;
     }
 
-    public String getmUsername() {
+    public String getUsername() {
         return mUsername;
     }
 
-    public String getmFirstName() {
+    public String getFirstName() {
         return mFirstName;
     }
 
-    public String getmLastName() {
+    public String getLastName() {
         return mLastName;
     }
 
-    public void setmUserId(int mUserId) {
+    public int getIsFollowing() { return mIsFollowing; }
+
+    public void setUserId(int mUserId) {
         this.mUserId = mUserId;
     }
 
-    public void setmUsername(String mUsername) {
+    public void setUsername(String mUsername) {
         this.mUsername = mUsername;
     }
 
-    public void setmFirstName(String mFirstName) {
+    public void setFirstName(String mFirstName) {
         this.mFirstName = mFirstName;
     }
 
-    public void setmLastName(String mLastName) {
+    public void setLastName(String mLastName) {
         this.mLastName = mLastName;
     }
 
-    public String getmBio() {
+    public String getBio() {
         return mBio;
     }
 
-    public int getmHasProfilePicture() {
+    public int getHasProfilePicture() {
         return mHasProfilePicture;
     }
 
-    public void setmBio(String mBio) {
+    public void setBio(String mBio) {
         this.mBio = mBio;
     }
 
-    public void setmHasProfilePicture(int mHasProfilePicture) {
+    public void setHasProfilePicture(int mHasProfilePicture) {
         this.mHasProfilePicture = mHasProfilePicture;
+    }
+
+    public void setIsFollowing(int following) {
+        this.mIsFollowing = following;
     }
 }

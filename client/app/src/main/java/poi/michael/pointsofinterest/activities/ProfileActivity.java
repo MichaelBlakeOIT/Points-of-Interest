@@ -28,10 +28,8 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -41,10 +39,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import poi.michael.pointsofinterest.models.NamedLocation;
+import poi.michael.pointsofinterest.interfaces.APIInterface;
+import poi.michael.pointsofinterest.models.POI;
+import poi.michael.pointsofinterest.models.User;
+import poi.michael.pointsofinterest.models.UserResponse;
+import poi.michael.pointsofinterest.utils.APIRequests;
 import poi.michael.pointsofinterest.utils.ImageTools;
 import poi.michael.pointsofinterest.R;
 import poi.michael.pointsofinterest.utils.volleySingleton;
+import retrofit2.Call;
+import retrofit2.Callback;
 
 public class ProfileActivity extends Activity {
     private String mProfileUsername;
@@ -52,7 +56,7 @@ public class ProfileActivity extends Activity {
     private String mBio;
     private RecyclerView mRecyclerView;
     private LinearLayoutManager mLinearLayoutManager;
-    private List<NamedLocation> list_locations = new ArrayList<>();
+    private List<POI> list_locations = new ArrayList<>();
     private int mFollowing;
     private Button mFollowButton;
 
@@ -72,14 +76,63 @@ public class ProfileActivity extends Activity {
 
         setContentView(R.layout.activity_profile);
 
-        mFollowButton = (Button) findViewById(R.id.profile_follow);
+        mFollowButton = findViewById(R.id.profile_follow);
 
         //hide follow button if viewing own profile
         if (mProfileUsername == null || mLoggedInUsername.equals(mProfileUsername)) {
             mFollowButton.setVisibility(View.GONE);
         }
 
-        new GetProfileDetailsTask().execute();
+        loadProfileDetails();
+    }
+
+    private void loadProfileDetails() {
+        SharedPreferences sharedPref = getSharedPreferences(getString(R.string.user_token), Context.MODE_PRIVATE);
+        String token = "Bearer " + sharedPref.getString("token", "");
+
+        APIInterface APIInterface = new APIRequests(getApplicationContext()).getInterface();
+        APIInterface.getUser(mProfileUsername, token).enqueue(new Callback<poi.michael.pointsofinterest.models.Response<UserResponse>>() {
+            @Override
+            public void onResponse(Call<poi.michael.pointsofinterest.models.Response<UserResponse>> call, retrofit2.Response<poi.michael.pointsofinterest.models.Response<UserResponse>> response) {
+                if (response.isSuccessful() && response.body().isSuccess()) {
+                    User user = response.body().getData().getUser();
+
+                    mBio = user.getBio();
+                    mProfileUsername = user.getUsername();
+                    mFollowing = user.getIsFollowing();
+
+                    TextView username = findViewById(R.id.profile_username);
+                    TextView bio = findViewById(R.id.profile_bio);
+                    //new DownloadImageTask((ImageView) findViewById(R.id.profile_picture))
+                    //        .execute("https://s3.us-east-2.amazonaws.com/points-of-interest/profile_photos/" + mProfileUsername.toLowerCase() + ".jpg");
+
+                    username.setText(mProfileUsername);
+                    if(!mBio.matches("null")) {
+                        bio.setText(mBio);
+                    }
+
+                    if(mFollowing == 1) {
+                        mFollowButton.setText("Unfollow User");
+                    }
+
+                    list_locations = response.body().getData().getPois();
+
+                    mRecyclerView = findViewById(R.id.profile_poi_feed);
+                    mRecyclerView.setHasFixedSize(true);
+                    mRecyclerView.setLayoutManager(mLinearLayoutManager);
+                    mRecyclerView.setAdapter(new MapAdapter(list_locations));
+                    mRecyclerView.setRecyclerListener(mRecycleListener);
+                }
+                else {
+                    //something
+                }
+            }
+
+            @Override
+            public void onFailure(Call<poi.michael.pointsofinterest.models.Response<UserResponse>> call, Throwable t) {
+
+            }
+        });
     }
 
     private RecyclerView.RecyclerListener mRecycleListener = new RecyclerView.RecyclerListener() {
@@ -99,11 +152,11 @@ public class ProfileActivity extends Activity {
 
     private class MapAdapter extends RecyclerView.Adapter<MapAdapter.ViewHolder> {
 
-        private List<NamedLocation> namedLocations;
+        private List<POI> POIS;
 
-        private MapAdapter(List<NamedLocation> locations) {
+        private MapAdapter(List<POI> locations) {
             super();
-            namedLocations = locations;
+            POIS = locations;
         }
 
         @Override
@@ -126,7 +179,7 @@ public class ProfileActivity extends Activity {
 
         @Override
         public int getItemCount() {
-            return namedLocations.size();
+            return POIS.size();
         }
 
         class ViewHolder extends RecyclerView.ViewHolder implements OnMapReadyCallback {
@@ -161,7 +214,7 @@ public class ProfileActivity extends Activity {
             private void setMapLocation() {
                 if (map == null) return;
 
-                NamedLocation data = (NamedLocation) mapView.getTag();
+                POI data = (POI) mapView.getTag();
                 if (data == null) return;
 
                 // Add a marker for this item and set the camera
@@ -175,7 +228,7 @@ public class ProfileActivity extends Activity {
             }
 
             private void bindView(int pos) {
-                NamedLocation item = namedLocations.get(pos);
+                POI item = POIS.get(pos);
                 // Store a reference of the ViewHolder object in the layout.
                 layout.setTag(this);
                 // Store a reference to the item in the mapView's tag. We use it to get the
@@ -184,91 +237,6 @@ public class ProfileActivity extends Activity {
                 setMapLocation();
                 title.setText(item.getName());
             }
-        }
-    }
-
-    private class GetProfileDetailsTask extends AsyncTask<Void, Void, Boolean> {
-        private Context mContext;
-
-        @Override
-        protected Boolean doInBackground(Void... params) {
-            String url = getResources().getString(R.string.base_url) + "/users/user/";
-
-            //viewing another profile or your own
-            url = (mProfileUsername != null) ? (url + mProfileUsername) : (url + mLoggedInUsername);
-
-            mContext = getApplicationContext();
-
-            StringRequest postRequest = new StringRequest(Request.Method.GET, url,
-                    new Response.Listener<String>() {
-                        @Override
-                        public void onResponse(String response) {
-                            try {
-                                JSONObject JSONResponse = new JSONObject(response);
-                                if (JSONResponse.getBoolean("success")) {
-                                    JSONObject info = JSONResponse.getJSONObject("message");
-
-                                    JSONObject user = info.getJSONObject("user");
-                                    JSONArray POIs = info.getJSONArray("pois");
-
-                                    mBio = user.getString("bio");
-                                    mProfileUsername = user.getString("username");
-                                    mFollowing = user.getInt("following");
-
-                                    TextView username = (TextView) findViewById(R.id.profile_username);
-                                    TextView bio = (TextView) findViewById(R.id.profile_bio);
-                                    new DownloadImageTask((ImageView) findViewById(R.id.profile_picture))
-                                            .execute("https://s3.us-east-2.amazonaws.com/points-of-interest/profile_photos/" + mProfileUsername.toLowerCase() + ".jpg");
-
-                                    username.setText(mProfileUsername);
-                                    if(!mBio.matches("null")) {
-                                        bio.setText(mBio);
-                                    }
-                                    if(mFollowing == 1) {
-                                        mFollowButton.setText("Unfollow User");
-                                    }
-
-                                    for(int i = 0; i < POIs.length(); i++) {
-                                        JSONObject POI = POIs.getJSONObject(i);
-                                        Double lat = POI.getDouble("lat");
-                                        Double _long = POI.getDouble("long");
-                                        String title = POI.getString("title");
-                                        //String description = POI.getString("description");
-                                        int poiId = POI.getInt("pio_id");
-                                        list_locations.add(new NamedLocation(title, new LatLng(lat, _long), poiId));
-                                    }
-
-                                    mRecyclerView = (RecyclerView) findViewById(R.id.profile_poi_feed);
-                                    mRecyclerView.setHasFixedSize(true);
-                                    mRecyclerView.setLayoutManager(mLinearLayoutManager);
-                                    mRecyclerView.setAdapter(new MapAdapter(list_locations));
-                                    mRecyclerView.setRecyclerListener(mRecycleListener);
-
-                                }
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    },
-                    new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            Log.d("Error.Response", error.toString());
-                        }
-                    }
-            ) {
-                @Override
-                public Map<String, String> getHeaders() throws AuthFailureError {
-                    SharedPreferences sharedPref = getSharedPreferences(getString(R.string.user_token), Context.MODE_PRIVATE);
-
-                    Map<String, String> params = new HashMap<String, String>();
-                    params.put("Authorization", "Bearer " + sharedPref.getString("token", ""));
-
-                    return params;
-                }
-            };
-            volleySingleton.getInstance(mContext).getRequestQueue().add(postRequest);
-            return true;
         }
     }
 

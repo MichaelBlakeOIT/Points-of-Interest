@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -41,7 +40,7 @@ public class CommentActivity extends Activity {
 
         Intent intentExtras = getIntent();
         mPoiId = intentExtras.getIntExtra("poi_id", 0);
-        mComment = (EditText) findViewById(R.id.comment_box);
+        mComment = findViewById(R.id.comment_box);
 
         mLinearLayoutManager = new LinearLayoutManager(this);
 
@@ -53,12 +52,12 @@ public class CommentActivity extends Activity {
         String token = "Bearer " + sharedPref.getString("token", "");
 
         APIInterface APIInterface = new APIRequests(getApplicationContext()).getInterface();
-        APIInterface.commentList(mPoiId, token).enqueue(new Callback<Response<List<Comment>>>() {
+        APIInterface.getCommentList(mPoiId, token).enqueue(new Callback<Response<List<Comment>>>() {
             @Override
             public void onResponse(Call<Response<List<Comment>>> call, retrofit2.Response<Response<List<Comment>>> response) {
                 if (response.isSuccessful()) {
                     mCommentAdapter = new CommentAdapter(response.body().getData());
-
+                    //TODO: LIVEDATA
                     mRecyclerView = findViewById(R.id.comments_recycler_view);
                     mRecyclerView.setHasFixedSize(true);
                     mRecyclerView.setLayoutManager(mLinearLayoutManager);
@@ -81,7 +80,7 @@ public class CommentActivity extends Activity {
         String token = "Bearer " + sharedPref.getString("token", "");
 
         APIInterface APIInterface = new APIRequests(getApplicationContext()).getInterface();
-        APIInterface.comment(mPoiId, comment, token).enqueue(new Callback<Response<Comment>>() {
+        APIInterface.createComment(mPoiId, comment, token).enqueue(new Callback<Response<Comment>>() {
             @Override
             public void onResponse(Call<Response<Comment>> call, retrofit2.Response<Response<Comment>> response) {
                 if (response.isSuccessful()) {
@@ -146,33 +145,6 @@ public class CommentActivity extends Activity {
                 layout.setTag(this);
                 username.setText(item.getUsername());
                 text.setText(item.getComment());
-            }
-        }
-    }
-
-    private class CreateCommentTask extends AsyncTask<String, Void, Boolean> {
-
-        String mCommentText;
-
-        CreateCommentTask(String comment) {
-            mCommentText = comment;
-        }
-
-        @Override
-        protected Boolean doInBackground(String... params) {
-            return new APIRequests(getApplicationContext()).makeComment(mPoiId, mCommentText);
-        }
-
-        @Override
-        protected void onPostExecute(final Boolean success) {
-            if (success) {
-                SharedPreferences sharedPref = getSharedPreferences(getString(R.string.user_token), Context.MODE_PRIVATE);
-                String username =  sharedPref.getString("username", "");
-                mListComments.add(new Comment(mCommentText, 0, mPoiId, 0, username));
-                mCommentAdapter.notifyDataSetChanged();
-                mComment.getText().clear();
-            } else {
-                Toast.makeText(getApplicationContext(), "An error occurred", Toast.LENGTH_SHORT).show();
             }
         }
     }

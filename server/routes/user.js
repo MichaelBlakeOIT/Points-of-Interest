@@ -119,7 +119,7 @@ router.get('/user/:username', requireAuth,
                         res.end();
                         return;
                     }
-                    res.json({ success: true, message: { user: user, pois: rows2 }});
+                    res.json({ success: true, data: { user: user, pois: rows2 }});
                     return;
                 });
             }

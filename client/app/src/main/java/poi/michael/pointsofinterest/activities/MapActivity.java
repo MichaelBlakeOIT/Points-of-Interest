@@ -35,7 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import poi.michael.pointsofinterest.R;
-import poi.michael.pointsofinterest.models.NamedLocation;
+import poi.michael.pointsofinterest.models.POI;
 import poi.michael.pointsofinterest.utils.APIRequests;
 import poi.michael.pointsofinterest.utils.MapTools;
 
@@ -232,15 +232,15 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         return bestLocation;
     }
 
-    private class loadPoints extends AsyncTask<Void, Void, ArrayList<NamedLocation>> {
+    private class loadPoints extends AsyncTask<Void, Void, ArrayList<POI>> {
         private boolean mOnlyFollowed;
         loadPoints(boolean onlyFollowed) {
             mOnlyFollowed = onlyFollowed;
         }
 
         @Override
-        protected ArrayList<NamedLocation> doInBackground(Void... params) {
-            ArrayList<NamedLocation> POIs;
+        protected ArrayList<POI> doInBackground(Void... params) {
+            ArrayList<POI> POIs;
 
             if (mOnlyFollowed)
                 POIs = new APIRequests(getApplicationContext()).getPOIs(APIRequests.PoiChoices.FOLLOWING);
@@ -251,13 +251,13 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         }
 
         @Override
-        protected void onPostExecute(final ArrayList<NamedLocation> points) {
+        protected void onPostExecute(final ArrayList<POI> points) {
 
             //on successful retrieval of POIs
             if (points != null) {
                 Marker marker;
 
-                for(NamedLocation poi: points) {
+                for(POI poi: points) {
                     marker = mMap.addMarker(new MarkerOptions().position(poi.getLocation()).title(poi.getName()));
 
                     marker.setTag(poi);
@@ -266,7 +266,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
                     @Override
                     public boolean onMarkerClick(Marker marker) {
-                        NamedLocation info = (NamedLocation) marker.getTag();
+                        POI info = (POI) marker.getTag();
                         Intent POIActivityIntent = new Intent(MapActivity.this, POIActivity.class);
 
                         POIActivityIntent.putExtra("title", info.getName());

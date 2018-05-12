@@ -22,7 +22,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import java.util.ArrayList;
 import java.util.List;
 
-import poi.michael.pointsofinterest.models.NamedLocation;
+import poi.michael.pointsofinterest.models.POI;
 import poi.michael.pointsofinterest.R;
 import poi.michael.pointsofinterest.utils.APIRequests;
 
@@ -42,11 +42,11 @@ public class FeedActivity extends Activity {
 
     private class MapAdapter extends RecyclerView.Adapter<MapAdapter.ViewHolder> {
 
-        private List<NamedLocation> namedLocations;
+        private List<POI> POIS;
 
-        private MapAdapter(List<NamedLocation> locations) {
+        private MapAdapter(List<POI> locations) {
             super();
-            namedLocations = locations;
+            POIS = locations;
         }
 
         @Override
@@ -69,7 +69,7 @@ public class FeedActivity extends Activity {
 
         @Override
         public int getItemCount() {
-            return namedLocations.size();
+            return POIS.size();
         }
 
         class ViewHolder extends RecyclerView.ViewHolder implements OnMapReadyCallback {
@@ -106,7 +106,7 @@ public class FeedActivity extends Activity {
             private void setMapLocation() {
                 if (map == null) return;
 
-                NamedLocation data = (NamedLocation) mapView.getTag();
+                POI data = (POI) mapView.getTag();
                 if (data == null) return;
 
                 // Add a marker for this item and set the camera
@@ -120,7 +120,7 @@ public class FeedActivity extends Activity {
             }
 
             private void bindView(final int pos) {
-                NamedLocation item = namedLocations.get(pos);
+                POI item = POIS.get(pos);
                 // Store a reference of the ViewHolder object in the layout.
                 layout.setTag(this);
                 // Store a reference to the item in the mapView's tag. We use it to get the
@@ -132,7 +132,7 @@ public class FeedActivity extends Activity {
                     @Override
                     public void onClick(View view) {
                         Intent commentsIntent = new Intent(FeedActivity.this, CommentActivity.class);
-                        commentsIntent.putExtra("poi_id", namedLocations.get(pos).getPoiId());
+                        commentsIntent.putExtra("poi_id", POIS.get(pos).getPoiId());
                         FeedActivity.this.startActivity(commentsIntent);
                     }
                 });
@@ -140,7 +140,7 @@ public class FeedActivity extends Activity {
                     @Override
                     public void onClick(View view) {
                         Intent photosIntent = new Intent(FeedActivity.this, PhotosActivity.class);
-                        photosIntent.putExtra("poi_id", namedLocations.get(pos).getPoiId());
+                        photosIntent.putExtra("poi_id", POIS.get(pos).getPoiId());
                         FeedActivity.this.startActivity(photosIntent);
                     }
                 });
@@ -148,10 +148,10 @@ public class FeedActivity extends Activity {
         }
     }
 
-    private class GetSavedPOIsTask extends AsyncTask<Void, Void, List<NamedLocation>> {
+    private class GetSavedPOIsTask extends AsyncTask<Void, Void, List<POI>> {
         @Override
-        protected List<NamedLocation> doInBackground(Void... params) {
-            ArrayList<NamedLocation> POIs;
+        protected List<POI> doInBackground(Void... params) {
+            ArrayList<POI> POIs;
 
             POIs = new APIRequests(getApplicationContext()).getPOIs(APIRequests.PoiChoices.FOLLOWING);
 
@@ -159,7 +159,7 @@ public class FeedActivity extends Activity {
         }
 
         @Override
-        protected void onPostExecute(final List<NamedLocation> points) {
+        protected void onPostExecute(final List<POI> points) {
 
             //on successful retrieval of POIs
             if (points != null) {

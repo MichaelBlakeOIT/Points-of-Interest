@@ -4,8 +4,9 @@ import java.util.List;
 
 import poi.michael.pointsofinterest.models.Comment;
 import poi.michael.pointsofinterest.models.Response;
+import poi.michael.pointsofinterest.models.User;
+import poi.michael.pointsofinterest.models.UserResponse;
 import retrofit2.Call;
-import retrofit2.http.Body;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
@@ -20,9 +21,12 @@ import retrofit2.http.Path;
 
 public interface APIInterface {
     @GET("/poi/{poi_id}/comments")
-    Call<Response<List<Comment>>> commentList(@Path("poi_id") int poiId, @Header("Authorization") String authHeader);
+    Call<Response<List<Comment>>> getCommentList(@Path("poi_id") int poiId, @Header("Authorization") String authHeader);
 
     @FormUrlEncoded
     @POST("/poi/{poi_id}/comments")
-    Call<Response<Comment>> comment(@Path("poi_id") int poiId, @Field("comment") String comment, @Header("Authorization") String authHeader);
+    Call<Response<Comment>> createComment(@Path("poi_id") int poiId, @Field("comment") String comment, @Header("Authorization") String authHeader);
+
+    @GET("/users/user/{username}")
+    Call<Response<UserResponse>> getUser(@Path("username") String username, @Header("Authorization") String authHeader);
 }
