@@ -52,7 +52,7 @@ router.post('/',
                         res.end();
                     }
                     else
-                        res.json({ success: true, message: 'Account created' });
+                        res.json({ success: true, data: { message: 'Account created' }});
                 });
             });
         });
@@ -66,7 +66,7 @@ router.put('/', requireAuth,
     ),
     function (req, res) {
         if (!req.form.isValid) {
-            res.json({ success: false, message: req.form.errors });
+            res.json({ success: false, data: { message: req.form.errors }});
             return;
         }
         var query = "UPDATE users SET bio = " + config.pool.escape(req.body.bio);
@@ -81,7 +81,7 @@ router.put('/', requireAuth,
                 res.end();
             }
             else {
-                res.json({ success: true, message: 'Profile updated' });
+                res.json({ success: true, data: { message: 'Profile updated' }});
             }
         });
 
@@ -92,7 +92,7 @@ router.get('/user/:username', requireAuth,
         field("req.params.username").isAlphanumeric().maxLength(16)
     ), function (req, res) {
         if (!req.form.isValid) {
-            res.json({ success: false, message: req.form.errors });
+            res.json({ success: false, data: { message: req.form.errors }});
             return;
         }
 
@@ -135,7 +135,7 @@ router.get('/', requireAuth, function (req, res) {
             return;
         }
         if (rows.length) {
-            res.json({ success: true, message: { user: rows[0] }});
+            res.json({ success: true, data: { user: rows[0] }});
             return;
         }
     });
@@ -145,7 +145,7 @@ router.post('/user/:username/follow', requireAuth,
     form(field("req.params.username").isAlphanumeric().maxLength(16)),
     function (req, res) {
         if (!req.form.isValid) {
-            res.json({ success: false, message: req.form.errors });
+            res.json({ success: false, data: { message: req.form.errors }});
             return;
         }
 
@@ -158,7 +158,7 @@ router.post('/user/:username/follow', requireAuth,
                 return;
             }
             if (!rows.length) {
-                res.json({ success: false, message: "Username doesn't exist" });
+                res.json({ success: false, data: { message: "Username doesn't exist" }});
                 return;
             }
 
@@ -172,7 +172,7 @@ router.post('/user/:username/follow', requireAuth,
                 }
 
                 if (rows.length) {
-                    res.json({ success: false, message: "Already following user" });
+                    res.json({ success: false, data: { message: "Already following user" }});
                 }
 
                 config.pool.query("INSERT INTO following (follower_id, following_id) VALUES (" + req.user.user_id + "," + user_id + ");", function (err, rows) {
@@ -183,7 +183,7 @@ router.post('/user/:username/follow', requireAuth,
                         return;
                     }
 
-                    res.json({ success: true, message: "Now following user" });
+                    res.json({ success: true, data: { message: "Now following user" }});
                 });
 
             });
@@ -194,7 +194,7 @@ router.delete('/user/:username/follow', requireAuth,
     form(field("req.params.username").isAlphanumeric().maxLength(16)),
     function (req, res) {
         if (!req.form.isValid) {
-            res.json({ success: false, message: req.form.errors });
+            res.json({ success: false, data: { message: req.form.errors }});
             return;
         }
 
@@ -207,7 +207,7 @@ router.delete('/user/:username/follow', requireAuth,
                 return;
             }
             if (!rows.length) {
-                res.json({ success: false, message: "Username doesn't exist" });
+                res.json({ success: false, data: { message: "Username doesn't exist" }});
                 return;
             }
 
@@ -220,10 +220,10 @@ router.delete('/user/:username/follow', requireAuth,
                     return;
                 }
                 if (rows.affectedRows == 0) {
-                    res.status(400).json({ success: false, message: "Not currently following user" });
+                    res.status(400).json({ success: false, data: { message: "Not currently following user" }});
                     return;
                 }
-                res.json({ success: true, message: "Unfollowed User" });
+                res.json({ success: true, data: { message: "Unfollowed User" }});
             });
         });
     });
@@ -234,7 +234,7 @@ router.get('/pois/saved', requireAuth, function (req, res) {
     config.pool.query(getPOIs, function (err, rows) {
         if (err) {
             console.log(err);
-            return res.json({ success: false, message: "Unknown error" });
+            return res.json({ success: false, data: { message: "Unknown error" }});
         }
         return res.json({ success: true, data: rows });
     });
@@ -252,7 +252,7 @@ router.get('/pois/following', requireAuth, function (req, res) {
     config.pool.query(getPOIs, function (err, rows) {
         if (err) {
             console.log(err);
-            return res.json({ success: false, message: "Unknown error" });
+            return res.json({ success: false, data: { message: "Unknown error" }});
         }
         return res.json({ success: true, data: rows });
     });
@@ -273,17 +273,17 @@ router.post('/reset', function (req, res) {
     config.pool.query(getEmail, function(err, rows) {
         if (err) {
             console.log(err);
-            return res.json({ success: false, message: "Unknown error" });
+            return res.json({ success: false, data: { message: "Unknown error" }});
         }
         if (rows.length) {
             email = rows[0].email;
             config.pool.query(reset, function (err, rows1) {
                 if (err) {
                     console.log(err);
-                    return res.json({ success: false, message: "Unknown error" });
+                    return res.json({ success: false, data: { message: "Unknown error" }});
                 }
                 sendResetEmail(code, email);
-                return res.json({ success: true, message: "If this account exists, an email will be sent."});
+                return res.json({ success: true, data: { message: "If this account exists, an email will be sent." }});
             });
         }
     });

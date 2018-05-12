@@ -4,9 +4,11 @@ import java.util.List;
 
 import poi.michael.pointsofinterest.models.Comment;
 import poi.michael.pointsofinterest.models.Response;
+import poi.michael.pointsofinterest.models.SuccessResponse;
 import poi.michael.pointsofinterest.models.User;
 import poi.michael.pointsofinterest.models.UserResponse;
 import retrofit2.Call;
+import retrofit2.http.DELETE;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
@@ -29,4 +31,10 @@ public interface APIInterface {
 
     @GET("/users/user/{username}")
     Call<Response<UserResponse>> getUser(@Path("username") String username, @Header("Authorization") String authHeader);
+
+    @POST("/users/user/{username}/follow")
+    Call<Response<SuccessResponse>> followUser(@Path("username") String username, @Header("Authorization") String authHeader);
+
+    @DELETE("/users/user/{username}/follow")
+    Call<Response<SuccessResponse>> unfollowUser(@Path("username") String username, @Header("Authorization") String authHeader);
 }

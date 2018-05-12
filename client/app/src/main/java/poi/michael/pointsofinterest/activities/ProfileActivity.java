@@ -18,11 +18,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.android.volley.AuthFailureError;
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -30,17 +25,13 @@ import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import poi.michael.pointsofinterest.interfaces.APIInterface;
 import poi.michael.pointsofinterest.models.POI;
+import poi.michael.pointsofinterest.models.SuccessResponse;
 import poi.michael.pointsofinterest.models.User;
 import poi.michael.pointsofinterest.models.UserResponse;
 import poi.michael.pointsofinterest.utils.APIRequests;
@@ -59,6 +50,8 @@ public class ProfileActivity extends Activity {
     private List<POI> list_locations = new ArrayList<>();
     private int mFollowing;
     private Button mFollowButton;
+    private APIInterface mAPIInterface;
+    private String mToken;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,6 +66,7 @@ public class ProfileActivity extends Activity {
 
         SharedPreferences sharedPref = getSharedPreferences(getString(R.string.user_token), Context.MODE_PRIVATE);
         mLoggedInUsername =  sharedPref.getString("username", "");
+        mToken = "Bearer " + sharedPref.getString("token", "");
 
         setContentView(R.layout.activity_profile);
 
@@ -83,15 +77,13 @@ public class ProfileActivity extends Activity {
             mFollowButton.setVisibility(View.GONE);
         }
 
+        mAPIInterface = new APIRequests(getApplicationContext()).getInterface();
+
         loadProfileDetails();
     }
 
     private void loadProfileDetails() {
-        SharedPreferences sharedPref = getSharedPreferences(getString(R.string.user_token), Context.MODE_PRIVATE);
-        String token = "Bearer " + sharedPref.getString("token", "");
-
-        APIInterface APIInterface = new APIRequests(getApplicationContext()).getInterface();
-        APIInterface.getUser(mProfileUsername, token).enqueue(new Callback<poi.michael.pointsofinterest.models.Response<UserResponse>>() {
+        mAPIInterface.getUser(mProfileUsername, mToken).enqueue(new Callback<poi.michael.pointsofinterest.models.Response<UserResponse>>() {
             @Override
             public void onResponse(Call<poi.michael.pointsofinterest.models.Response<UserResponse>> call, retrofit2.Response<poi.michael.pointsofinterest.models.Response<UserResponse>> response) {
                 if (response.isSuccessful() && response.body().isSuccess()) {
@@ -130,6 +122,38 @@ public class ProfileActivity extends Activity {
 
             @Override
             public void onFailure(Call<poi.michael.pointsofinterest.models.Response<UserResponse>> call, Throwable t) {
+
+            }
+        });
+    }
+
+    private void followUser() {
+        mAPIInterface.followUser(mProfileUsername, mToken).enqueue(new Callback<poi.michael.pointsofinterest.models.Response<SuccessResponse>>() {
+            @Override
+            public void onResponse(Call<poi.michael.pointsofinterest.models.Response<SuccessResponse>> call, retrofit2.Response<poi.michael.pointsofinterest.models.Response<SuccessResponse>> response) {
+                if (response.isSuccessful() && response.body().isSuccess()) {
+                    mFollowButton.setText("Unfollow User");
+                    mFollowing = 1;
+                }
+            }
+
+            @Override
+            public void onFailure(Call<poi.michael.pointsofinterest.models.Response<SuccessResponse>> call, Throwable t) {
+
+            }
+        });
+    }
+
+    private void unfollowUser() {
+        mAPIInterface.unfollowUser(mProfileUsername, mToken).enqueue(new Callback<poi.michael.pointsofinterest.models.Response<SuccessResponse>>() {
+            @Override
+            public void onResponse(Call<poi.michael.pointsofinterest.models.Response<SuccessResponse>> call, retrofit2.Response<poi.michael.pointsofinterest.models.Response<SuccessResponse>> response) {
+                mFollowButton.setText("Follow User");
+                mFollowing = 0;
+            }
+
+            @Override
+            public void onFailure(Call<poi.michael.pointsofinterest.models.Response<SuccessResponse>> call, Throwable t) {
 
             }
         });
@@ -269,62 +293,13 @@ public class ProfileActivity extends Activity {
 
     }
 
-    private class FollowUserTask extends AsyncTask<Void, Void, Boolean> {
-        private Context mContext;
-
-        @Override
-        protected Boolean doInBackground(Void... params) {
-            String url = getResources().getString(R.string.base_url) + "/users/user/" + mProfileUsername.trim() + "/follow";
-            int method = mFollowing == 1 ? Request.Method.DELETE : Request.Method.POST;
-            Log.e("url", url);
-
-            mContext = getApplicationContext();
-
-            StringRequest putRequest = new StringRequest(method, url,
-                    new Response.Listener<String>() {
-                        @Override
-                        public void onResponse(String response) {
-                            // response
-                            try {
-                                JSONObject JSONResponse = new JSONObject(response);
-                                if (JSONResponse.getBoolean("success")) {
-                                    if(mFollowing == 1) {
-                                        mFollowButton.setText("Follow User");
-                                        mFollowing = 0;
-                                    }
-                                    else {
-                                        mFollowButton.setText("Unfollow User");
-                                        mFollowing = 1;
-                                    }
-                                }
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    },
-                    new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            Log.d("Error.Response", error.toString());
-                        }
-                    }
-            ) {
-                @Override
-                public Map<String, String> getHeaders() throws AuthFailureError {
-                    SharedPreferences sharedPref = getSharedPreferences(getString(R.string.user_token), Context.MODE_PRIVATE);
-
-                    Map<String, String> params = new HashMap<String, String>();
-                    params.put("Authorization", "Bearer " + sharedPref.getString("token", ""));
-
-                    return params;
-                }
-            };
-            volleySingleton.getInstance(mContext).getRequestQueue().add(putRequest);
-            return true;
-        }
-    }
-
     public void followUser(View v) {
-        new FollowUserTask().execute();
+
+        if (mFollowing == 1) {
+            unfollowUser();
+        }
+        else {
+            followUser();
+        }
     }
 }
