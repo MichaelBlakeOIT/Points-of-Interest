@@ -1,98 +1,61 @@
 package poi.michael.pointsofinterest.activities;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
+import android.support.annotation.NonNull;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.HashMap;
-import java.util.Map;
-
 import poi.michael.pointsofinterest.R;
-import poi.michael.pointsofinterest.utils.volleySingleton;
+import poi.michael.pointsofinterest.interfaces.APIInterface;
+import poi.michael.pointsofinterest.models.SuccessResponse;
+import poi.michael.pointsofinterest.utils.APIRequests;
+import retrofit2.Call;
+import retrofit2.Callback;
 
 public class ForgotPasswordActivity extends Activity {
+
+    private APIInterface mAPIInterface;
+    private EditText mUsernameText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_forgot_password);
+
+        mUsernameText = findViewById(R.id.resetpasswordusernamefield);
+
+        mAPIInterface = new APIRequests(getApplicationContext()).getInterface();
     }
 
-    private class SendEmailTask extends AsyncTask<Void, Void, Boolean> {
-
-        private final String mUsername;
-        private Context mContext;
-
-        SendEmailTask(String username) {
-            mUsername = username;
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... params) {
-            String url = getResources().getString(R.string.base_url) + "/users/reset";
-            mContext = getApplicationContext();
-
-            StringRequest postRequest = new StringRequest(Request.Method.POST, url,
-                    new Response.Listener<String>()
-                    {
-                        @Override
-                        public void onResponse(String response) {
-                            // response
-                            try {
-                                JSONObject JSONResponse = new JSONObject(response);
-                                if (!JSONResponse.getBoolean("success")) {
-                                    Toast.makeText(getApplicationContext(), "An error occurred", Toast.LENGTH_SHORT).show();
-                                }
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    },
-                    new Response.ErrorListener()
-                    {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            // error
-                            Log.d("Error.Response", error.toString());
-                        }
-                    }
-            ) {
+    private void sendEmail() {
+        if(mUsernameText.getText() != null) {
+            mAPIInterface.sendResetEmail(mUsernameText.getText().toString()).enqueue(new Callback<poi.michael.pointsofinterest.models.Response<SuccessResponse>>() {
                 @Override
-                protected Map<String, String> getParams()
-                {
-                    Map<String, String>  params = new HashMap<String, String>();
-                    params.put("username", mUsername);
-                    return params;
+                public void onResponse(@NonNull Call<poi.michael.pointsofinterest.models.Response<SuccessResponse>> call, @NonNull retrofit2.Response<poi.michael.pointsofinterest.models.Response<SuccessResponse>> response) {
+                    if (response.isSuccessful() && response.body().isSuccess()) {
+                        Intent launchResetIntent = new Intent(ForgotPasswordActivity.this, ResetPasswordActivity.class);
+                        launchResetIntent.putExtra("username", mUsernameText.getText().toString());
+                        ForgotPasswordActivity.this.startActivity(launchResetIntent);
+
+                        Toast.makeText(getApplicationContext(), response.body().getData().getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                    else {
+                        Toast.makeText(getApplicationContext(), "An error occurred", Toast.LENGTH_SHORT).show();
+                    }
                 }
-            };
-            volleySingleton.getInstance(mContext).getRequestQueue().add(postRequest);
-            return true;
+
+                @Override
+                public void onFailure(@NonNull Call<poi.michael.pointsofinterest.models.Response<SuccessResponse>> call, @NonNull Throwable t) {
+                    Toast.makeText(getApplicationContext(), "An error occurred", Toast.LENGTH_SHORT).show();
+                }
+            });
         }
     }
 
     public void launchReset(View v) {
-        EditText usernameText = (EditText) findViewById(R.id.resetpasswordusernamefield);
-        String username = usernameText.getText().toString();
-
-        if (!username.equals("")) {
-            new SendEmailTask(usernameText.getText().toString()).execute();
-            Intent launchResetIntent = new Intent(ForgotPasswordActivity.this, ResetPasswordActivity.class);
-            launchResetIntent.putExtra("username", username);
-            ForgotPasswordActivity.this.startActivity(launchResetIntent);
-        }
+        sendEmail();
     }
 }
