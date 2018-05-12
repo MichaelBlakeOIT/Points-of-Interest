@@ -44,48 +44,6 @@ public class APIRequests {
 
     /**
      * Created by michael on 4/17/2018.
-     * API request for logging into an account.
-     *
-     * Returns auth token
-     */
-
-    public String login(String username, String password) {
-        String url = base_api_url + "session";
-
-        RequestBody formBody = new FormBody.Builder()
-                .add("username", username)
-                .add("password", password)
-                .build();
-
-        Request request = new Request.Builder()
-                .url(url)
-                .post(formBody)
-                .build();
-        try {
-            Response response = client.newCall(request).execute();
-
-            if(!response.isSuccessful()) {
-                return null;
-            }
-
-            String json_string = response.body().string();
-
-            JSONObject JSONResponse = new JSONObject(json_string);
-
-            if (!JSONResponse.getBoolean("success")) {
-                //invalid login (probably) TODO: handle other errors
-                return null;
-            }
-
-            return JSONResponse.getString("token");
-        } catch (IOException | JSONException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    /**
-     * Created by michael on 4/17/2018.
      * API request for registering a new account.
      *
      * Retuns true on successful sign up, false otherwise.

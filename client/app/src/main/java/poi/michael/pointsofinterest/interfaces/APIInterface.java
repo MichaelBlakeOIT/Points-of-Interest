@@ -37,4 +37,8 @@ public interface APIInterface {
 
     @DELETE("/users/user/{username}/follow")
     Call<Response<SuccessResponse>> unfollowUser(@Path("username") String username, @Header("Authorization") String authHeader);
+
+    @FormUrlEncoded
+    @POST("/session")
+    Call<Response<String>> login(@Field("username") String username, @Field("password") String password);
 }

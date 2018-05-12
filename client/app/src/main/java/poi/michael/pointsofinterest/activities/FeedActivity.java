@@ -84,10 +84,10 @@ public class FeedActivity extends Activity {
             private ViewHolder(View itemView) {
                 super(itemView);
                 layout = itemView;
-                mapView = (MapView) layout.findViewById(R.id.lite_listrow_map);
-                title = (TextView) layout.findViewById(R.id.saved_poi_title);
-                comments = (Button) layout.findViewById(R.id.comments_button);
-                photos = (Button) layout.findViewById(R.id.photos_button);
+                mapView = layout.findViewById(R.id.lite_listrow_map);
+                title = layout.findViewById(R.id.saved_poi_title);
+                comments = layout.findViewById(R.id.comments_button);
+                photos = layout.findViewById(R.id.photos_button);
                 if (mapView != null) {
                     // Initialise the MapView
                     mapView.onCreate(null);

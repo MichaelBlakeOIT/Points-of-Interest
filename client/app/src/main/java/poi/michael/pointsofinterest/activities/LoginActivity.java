@@ -5,7 +5,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AutoCompleteTextView;
@@ -14,27 +13,36 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import poi.michael.pointsofinterest.interfaces.APIInterface;
+import poi.michael.pointsofinterest.models.Response;
 import poi.michael.pointsofinterest.utils.APIRequests;
 import poi.michael.pointsofinterest.R;
+import retrofit2.Call;
+import retrofit2.Callback;
 
 public class LoginActivity extends Activity {
     private AutoCompleteTextView mUsernameView;
     private EditText mPasswordView;
     private Button mSignInButton;
     private TextView mRegisterTextView;
+    private APIInterface mAPIInterface;
+    private ProgressDialog mProgDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        mSignInButton = (Button) findViewById(R.id.sign_in_button);
-        mRegisterTextView = (TextView) findViewById(R.id.registerSelect);
-        mUsernameView = (AutoCompleteTextView) findViewById(R.id.UsernameLoginField);
-        mPasswordView = (EditText) findViewById(R.id.passwordLoginField);
+        mSignInButton = findViewById(R.id.sign_in_button);
+        mRegisterTextView = findViewById(R.id.registerSelect);
+        mUsernameView = findViewById(R.id.UsernameLoginField);
+        mPasswordView = findViewById(R.id.passwordLoginField);
 
         mSignInButton.setOnClickListener(mSignInButtonListener);
         mRegisterTextView.setOnClickListener(mRegisterSelectListener);
+
+        mAPIInterface = new APIRequests(getApplicationContext()).getInterface();
+        mProgDialog = new ProgressDialog(LoginActivity.this);
 
         checkToken();
     }
@@ -46,7 +54,14 @@ public class LoginActivity extends Activity {
             String username = mUsernameView.getText().toString();
             String password = mPasswordView.getText().toString();
 
-            new UserLoginTask().execute(username, password);
+
+            mProgDialog.setMessage("Logging in…");
+            mProgDialog.setIndeterminate(false);
+            mProgDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            mProgDialog.setCancelable(true);
+            mProgDialog.show();
+
+            login(username, password);
         }
     };
 
@@ -60,49 +75,38 @@ public class LoginActivity extends Activity {
         }
     };
 
-    private class UserLoginTask extends AsyncTask<String, Void, String> {
+    private void login(String username, String password) {
+        mAPIInterface.login(username, password).enqueue(new Callback<Response<String>>() {
+            @Override
+            public void onResponse(Call<Response<String>> call, retrofit2.Response<Response<String>> response) {
+                if (response.isSuccessful() && response.body().isSuccess()) {
+                    SharedPreferences sharedPref = getSharedPreferences(getString(R.string.user_token), Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPref.edit();
 
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            ProgressDialog progDialog = new ProgressDialog(LoginActivity.this);
-            progDialog.setMessage("Logging in…");
-            progDialog.setIndeterminate(false);
-            progDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-            progDialog.setCancelable(true);
-            progDialog.show();
-        }
+                    String token = response.body().getData();
 
-        @Override
-        protected String doInBackground(String... params) {
-            String username = params[0];
-            String password = params[1];
+                    editor.putString("token", token);
+                    editor.putString("username", mUsernameView.getText().toString());
+                    editor.apply();
 
-            String response = new APIRequests(getApplicationContext()).login(username, password);
+                    Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_SHORT).show();
+                    mProgDialog.dismiss();
 
-            return response;
-        }
+                    Intent MapActivityIntent = new Intent(LoginActivity.this, MapActivity.class);
+                    LoginActivity.this.startActivity(MapActivityIntent);
 
-        @Override
-        protected void onPostExecute(final String token) {
-            if (token != null) {
-                SharedPreferences sharedPref = getSharedPreferences(getString(R.string.user_token), Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = sharedPref.edit();
-
-                editor.putString("token", token);
-                editor.putString("username", mUsernameView.getText().toString());
-                editor.apply();
-
-                Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_SHORT).show();
-
-                Intent MapActivityIntent = new Intent(LoginActivity.this, MapActivity.class);
-                LoginActivity.this.startActivity(MapActivityIntent);
-
-                LoginActivity.this.finish();
-            } else {
-                Toast.makeText(getApplicationContext(), "Incorrect login", Toast.LENGTH_SHORT).show();
+                    LoginActivity.this.finish();
+                }
+                else if (response.isSuccessful() && !response.body().isSuccess()) {
+                    Toast.makeText(getApplicationContext(), response.body().getData(), Toast.LENGTH_SHORT).show();
+                }
             }
-        }
+
+            @Override
+            public void onFailure(Call<Response<String>> call, Throwable t) {
+
+            }
+        });
     }
 
     private void checkToken()
