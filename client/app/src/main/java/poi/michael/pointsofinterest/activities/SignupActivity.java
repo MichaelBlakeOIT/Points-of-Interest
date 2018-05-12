@@ -2,16 +2,21 @@ package poi.michael.pointsofinterest.activities;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.view.View;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import poi.michael.pointsofinterest.interfaces.APIInterface;
+import poi.michael.pointsofinterest.models.Response;
+import poi.michael.pointsofinterest.models.SuccessResponse;
 import poi.michael.pointsofinterest.utils.APIRequests;
 import poi.michael.pointsofinterest.R;
+import retrofit2.Call;
+import retrofit2.Callback;
 
 public class SignupActivity extends Activity {
 
@@ -20,19 +25,23 @@ public class SignupActivity extends Activity {
     private EditText mFirstNameView;
     private EditText mLastNameView;
     private EditText mEmailView;
+    private APIInterface mAPIInterface;
+    private ProgressDialog mProgressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
 
-        mUsernameView = (AutoCompleteTextView) findViewById(R.id.UsernameSignupField);
-        mPasswordView = (EditText) findViewById(R.id.PasswordSignupField);
-        mFirstNameView = (EditText) findViewById(R.id.FirstNameSignupField);
-        mLastNameView = (EditText) findViewById(R.id.LastNameSignupField);
-        mEmailView = (EditText) findViewById(R.id.EmailSignupField);
+        mUsernameView = findViewById(R.id.UsernameSignupField);
+        mPasswordView = findViewById(R.id.PasswordSignupField);
+        mFirstNameView = findViewById(R.id.FirstNameSignupField);
+        mLastNameView = findViewById(R.id.LastNameSignupField);
+        mEmailView = findViewById(R.id.EmailSignupField);
+        mAPIInterface = new APIRequests(getApplicationContext()).getInterface();
+        mProgressDialog = new ProgressDialog(SignupActivity.this);
 
-        Button mSignupButton = (Button) findViewById(R.id.sign_up_button);
+        Button mSignupButton = findViewById(R.id.sign_up_button);
         mSignupButton.setOnClickListener(mSignupButtonListener);
     }
 
@@ -40,51 +49,45 @@ public class SignupActivity extends Activity {
         public void onClick(View v) {
             String username = mUsernameView.getText().toString();
             String password = mPasswordView.getText().toString();
-            String first_name = mFirstNameView.getText().toString();
-            String last_name = mLastNameView.getText().toString();
+            String firstName = mFirstNameView.getText().toString();
+            String lastName = mLastNameView.getText().toString();
             String email = mEmailView.getText().toString();
 
             //TODO: check if all values are valid.
-            new UserSignupTask().execute(username, password, first_name, last_name, email);
+            signup(username, password, firstName, lastName, email);
 
         }
     };
 
-    public class UserSignupTask extends AsyncTask<String, Void, Boolean> {
+    private void signup(String username, String password, String firstName, String lastName, String email) {
+        mProgressDialog.setMessage("Registering…");
+        mProgressDialog.setIndeterminate(false);
+        mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        mProgressDialog.setCancelable(true);
+        mProgressDialog.show();
 
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            ProgressDialog progDialog = new ProgressDialog(SignupActivity.this);
-            progDialog.setMessage("Registering…");
-            progDialog.setIndeterminate(false);
-            progDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-            progDialog.setCancelable(true);
-            progDialog.show();
-        }
+        mAPIInterface.register(username, password, firstName, lastName, email).enqueue(new Callback<Response<SuccessResponse>>() {
+            @Override
+            public void onResponse(@NonNull Call<Response<SuccessResponse>> call, @NonNull retrofit2.Response<Response<SuccessResponse>> response) {
+                Response<SuccessResponse> body = response.body();
 
-        @Override
-        protected Boolean doInBackground(String... params) {
-            String username = params[0];
-            String password = params[1];
-            String first_name = params[2];
-            String last_name = params[3];
-            String email = params[4];
-
-            boolean success = new APIRequests(getApplicationContext()).register(username, password, first_name, last_name, email);
-
-            return success;
-        }
-
-        @Override
-        protected void onPostExecute(final Boolean success) {
-            if(success) {
-                Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_SHORT).show();
-                finish();
+                if (body != null && response.isSuccessful() && body.isSuccess()) {
+                    mProgressDialog.dismiss();
+                    Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+                else if (body != null && !body.isSuccess()){
+                    Toast.makeText(getApplicationContext(), body.getData().getMessage(), Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    Toast.makeText(getApplicationContext(), "Unknown error", Toast.LENGTH_SHORT).show();
+                }
             }
-            else {
+
+            @Override
+            public void onFailure(@NonNull Call<Response<SuccessResponse>> call, @NonNull Throwable t) {
                 Toast.makeText(getApplicationContext(), "An error occurred", Toast.LENGTH_SHORT).show();
             }
-        }
+        });
     }
 }

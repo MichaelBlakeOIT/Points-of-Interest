@@ -30,7 +30,6 @@ import poi.michael.pointsofinterest.models.POI;
 
 public class APIRequests {
     private final String base_api_url = "https://points-of-interest.herokuapp.com/";
-    //private final String base_api_url = "https://6270b593-a1b0-4ef8-87dd-11877a1d8397.mock.pstmn.io";
     private Context mContext;
     private OkHttpClient client = new OkHttpClient();
 
@@ -40,46 +39,6 @@ public class APIRequests {
 
     public APIRequests(Context context) {
         mContext = context;
-    }
-
-    /**
-     * Created by michael on 4/17/2018.
-     * API request for registering a new account.
-     *
-     * Retuns true on successful sign up, false otherwise.
-     */
-
-    public boolean register(String username, String password, String first_name, String last_name, String email) {
-        String url = base_api_url + "users";
-
-        RequestBody formBody = new FormBody.Builder()
-                .add("username", username)
-                .add("password", password)
-                .add("firstname", first_name)
-                .add("lastname", last_name)
-                .add("email", email)
-                .build();
-
-        Request request = new Request.Builder()
-                .url(url)
-                .post(formBody)
-                .build();
-        try {
-            Response response = client.newCall(request).execute();
-
-            if(!response.isSuccessful()) {
-                return false;
-            }
-
-            String json_string = response.body().string();
-
-            JSONObject JSONResponse = new JSONObject(json_string);
-
-            return JSONResponse.getBoolean("success");
-        } catch (IOException | JSONException e) {
-            e.printStackTrace();
-            return false;
-        }
     }
 
     /**
@@ -149,78 +108,6 @@ public class APIRequests {
         }
     }
 
-    public boolean makeComment(int poiId, String commentText) {
-        String url = base_api_url + "poi/" + poiId + "/comments";
-
-        RequestBody formBody = new FormBody.Builder()
-                .add("comment", commentText)
-                .build();
-
-        Request request = new Request.Builder()
-                .url(url)
-                .addHeader("Authorization", getBearerToken())
-                .post(formBody)
-                .build();
-        try {
-            Response response = client.newCall(request).execute();
-
-            if(!response.isSuccessful()) {
-                return false;
-            }
-
-            String json_string = response.body().string();
-
-            JSONObject JSONResponse = new JSONObject(json_string);
-
-            return JSONResponse.getBoolean("success");
-        } catch (IOException | JSONException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    public List<Comment> getComments(int poiId) {
-        String url = base_api_url + "poi/" + poiId + "/comments";
-        List<Comment> list_comments = new ArrayList<>();
-
-        Request request = new Request.Builder()
-                .url(url)
-                .addHeader("Authorization", getBearerToken())
-                .build();
-        try {
-            Response response = client.newCall(request).execute();
-            ArrayList<Comment> comments = new ArrayList<>();
-
-            if(!response.isSuccessful()) {
-                return null;
-            }
-
-            String json_string = response.body().string();
-
-            JSONObject JSONResponse = new JSONObject(json_string);
-
-            if (!JSONResponse.getBoolean("success")) {
-                return null;
-            }
-
-            JSONArray comments_json = JSONResponse.getJSONArray("data");
-
-            for(int i = 0; i < comments_json.length(); i++) {
-                JSONObject comment = comments_json.getJSONObject(i);
-                String commentText = comment.getString("comment");
-                int commentId = comment.getInt("comment_id");
-                int userId = comment.getInt("user_id");
-                String username = comment.getString("username");
-
-                list_comments.add(new Comment(commentText, userId, poiId, commentId, username));
-            }
-
-            return list_comments;
-        } catch (IOException | JSONException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
 
     public String getBearerToken() {
         SharedPreferences sharedPref = mContext.getSharedPreferences(mContext.getString(R.string.user_token), Context.MODE_PRIVATE);

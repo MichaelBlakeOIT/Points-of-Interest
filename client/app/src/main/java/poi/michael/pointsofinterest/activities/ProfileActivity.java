@@ -29,6 +29,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import poi.michael.pointsofinterest.adapters.MapRecyclerAdapter;
 import poi.michael.pointsofinterest.interfaces.APIInterface;
 import poi.michael.pointsofinterest.models.POI;
 import poi.michael.pointsofinterest.models.SuccessResponse;
@@ -109,8 +110,9 @@ public class ProfileActivity extends Activity {
                     mRecyclerView = findViewById(R.id.profile_poi_feed);
                     mRecyclerView.setHasFixedSize(true);
                     mRecyclerView.setLayoutManager(mLinearLayoutManager);
-                    mRecyclerView.setAdapter(new MapAdapter(list_locations));
-                    mRecyclerView.setRecyclerListener(mRecycleListener);
+                    mRecyclerView.setAdapter(new MapRecyclerAdapter(list_locations, getApplicationContext()));
+                    //mRecyclerView.setAdapter(new MapAdapter(list_locations));
+                    //mRecyclerView.setRecyclerListener(mRecycleListener);
                 }
                 else {
                     //something
@@ -156,11 +158,11 @@ public class ProfileActivity extends Activity {
         });
     }
 
-    private RecyclerView.RecyclerListener mRecycleListener = new RecyclerView.RecyclerListener() {
+    /*private RecyclerView.RecyclerListener mRecycleListener = new RecyclerView.RecyclerListener() {
 
         @Override
         public void onViewRecycled(RecyclerView.ViewHolder holder) {
-            MapAdapter.ViewHolder mapHolder = (MapAdapter.ViewHolder) holder;
+            MapRecyclerAdapter.ViewHolder mapHolder = (MapRecyclerAdapter.ViewHolder) holder;
             if (mapHolder != null && mapHolder.map != null) {
                 // Clear the map and free up resources by changing the map type to none.
                 // Also reset the map when it gets reattached to layout, so the previous map would
@@ -169,97 +171,8 @@ public class ProfileActivity extends Activity {
                 mapHolder.map.setMapType(GoogleMap.MAP_TYPE_NONE);
             }
         }
-    };
+    };*/
 
-    private class MapAdapter extends RecyclerView.Adapter<MapAdapter.ViewHolder> {
-
-        private List<POI> POIS;
-
-        private MapAdapter(List<POI> locations) {
-            super();
-            POIS = locations;
-        }
-
-        @Override
-        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            return new ViewHolder(LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.poi_list_fragment, parent, false));
-        }
-
-        /**
-         * This function is called when the user scrolls through the screen and a new item needs
-         * to be shown. So we will need to bind the holder with the details of the next item.
-         */
-        @Override
-        public void onBindViewHolder(ViewHolder holder, int position) {
-            if (holder == null) {
-                return;
-            }
-            holder.bindView(position);
-        }
-
-        @Override
-        public int getItemCount() {
-            return POIS.size();
-        }
-
-        class ViewHolder extends RecyclerView.ViewHolder implements OnMapReadyCallback {
-
-            MapView mapView;
-            TextView title;
-            GoogleMap map;
-            View layout;
-            Button comments;
-
-            private ViewHolder(View itemView) {
-                super(itemView);
-                layout = itemView;
-                mapView = layout.findViewById(R.id.lite_listrow_map);
-                title = layout.findViewById(R.id.saved_poi_title);
-                comments = layout.findViewById(R.id.comments_button);
-                if (mapView != null) {
-                    // Initialise the MapView
-                    mapView.onCreate(null);
-                    // Set the map ready callback to receive the GoogleMap object
-                    mapView.getMapAsync(this);
-                }
-            }
-
-            @Override
-            public void onMapReady(GoogleMap googleMap) {
-                MapsInitializer.initialize(getApplicationContext());
-                map = googleMap;
-                setMapLocation();
-            }
-
-            private void setMapLocation() {
-                if (map == null) return;
-
-                POI data = (POI) mapView.getTag();
-                if (data == null) return;
-
-                // Add a marker for this item and set the camera
-                map.moveCamera(CameraUpdateFactory.newLatLngZoom(data.getLocation(), 13f));
-                map.addMarker(new MarkerOptions().position(data.getLocation()));
-
-                // Set the map type back to normal.
-                map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-
-                mapView.onResume();
-            }
-
-            private void bindView(int pos) {
-                POI item = POIS.get(pos);
-                // Store a reference of the ViewHolder object in the layout.
-                layout.setTag(this);
-                // Store a reference to the item in the mapView's tag. We use it to get the
-                // coordinate of a location, when setting the map location.
-                mapView.setTag(item);
-                setMapLocation();
-                title.setText(item.getName());
-            }
-        }
-    }
 
     private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
         ImageView bmImage;

@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.view.View;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -27,6 +28,7 @@ public class LoginActivity extends Activity {
     private TextView mRegisterTextView;
     private APIInterface mAPIInterface;
     private ProgressDialog mProgDialog;
+    private SharedPreferences mSharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +46,8 @@ public class LoginActivity extends Activity {
         mAPIInterface = new APIRequests(getApplicationContext()).getInterface();
         mProgDialog = new ProgressDialog(LoginActivity.this);
 
+        mSharedPreferences = getSharedPreferences(getString(R.string.user_token), Context.MODE_PRIVATE);
+
         checkToken();
     }
 
@@ -53,7 +57,6 @@ public class LoginActivity extends Activity {
         {
             String username = mUsernameView.getText().toString();
             String password = mPasswordView.getText().toString();
-
 
             mProgDialog.setMessage("Logging in…");
             mProgDialog.setIndeterminate(false);
@@ -78,15 +81,14 @@ public class LoginActivity extends Activity {
     private void login(String username, String password) {
         mAPIInterface.login(username, password).enqueue(new Callback<Response<String>>() {
             @Override
-            public void onResponse(Call<Response<String>> call, retrofit2.Response<Response<String>> response) {
+            public void onResponse(@NonNull Call<Response<String>> call, @NonNull retrofit2.Response<Response<String>> response) {
                 if (response.isSuccessful() && response.body().isSuccess()) {
-                    SharedPreferences sharedPref = getSharedPreferences(getString(R.string.user_token), Context.MODE_PRIVATE);
-                    SharedPreferences.Editor editor = sharedPref.edit();
+                    SharedPreferences.Editor editor = mSharedPreferences.edit();
 
                     String token = response.body().getData();
 
                     editor.putString("token", token);
-                    editor.putString("username", mUsernameView.getText().toString());
+                    editor.putString("username", mUsernameView.getText().toString().trim());
                     editor.apply();
 
                     Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_SHORT).show();
@@ -103,7 +105,7 @@ public class LoginActivity extends Activity {
             }
 
             @Override
-            public void onFailure(Call<Response<String>> call, Throwable t) {
+            public void onFailure(@NonNull Call<Response<String>> call, @NonNull Throwable t) {
 
             }
         });
@@ -111,8 +113,7 @@ public class LoginActivity extends Activity {
 
     private void checkToken()
     {
-        SharedPreferences sharedPrefs = getSharedPreferences(getString(R.string.user_token), MODE_PRIVATE);
-        if (sharedPrefs.contains("token"))
+        if (mSharedPreferences.contains("token"))
         {
             Intent MapActivityIntent = new Intent(LoginActivity.this, MapActivity.class);
             LoginActivity.this.startActivity(MapActivityIntent);

@@ -28,7 +28,7 @@ router.post('/',
             bcrypt.compare(req.body.password, rows[0].password, function (err, result) {
                 if (result === false)
                     return res.json({ success: false, data: "Incorrect password" });
-                return res.json({ success: true, token: jwt.sign({ id: rows[0].user_id, username: rows[0].username, email: rows[0].email, first: rows[0].first_name, last: rows[0].last_name }, config.jwtSecret) });
+                return res.json({ success: true, data: jwt.sign({ id: rows[0].user_id, username: rows[0].username, email: rows[0].email, first: rows[0].first_name, last: rows[0].last_name }, config.jwtSecret) });
             });
         });
 });

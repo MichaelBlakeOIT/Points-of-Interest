@@ -3,6 +3,7 @@ package poi.michael.pointsofinterest.interfaces;
 import java.util.List;
 
 import poi.michael.pointsofinterest.models.Comment;
+import poi.michael.pointsofinterest.models.POI;
 import poi.michael.pointsofinterest.models.Response;
 import poi.michael.pointsofinterest.models.SuccessResponse;
 import poi.michael.pointsofinterest.models.User;
@@ -41,4 +42,21 @@ public interface APIInterface {
     @FormUrlEncoded
     @POST("/session")
     Call<Response<String>> login(@Field("username") String username, @Field("password") String password);
+
+    @GET("/poi")
+    Call<Response<List<POI>>> getAllPois(@Header("Authorization") String authHeader);
+
+    @GET("/users/pois/following")
+    Call<Response<List<POI>>> getFollowingPois(@Header("Authorization") String authHeader);
+
+    @GET("/users/pois/saved")
+    Call<Response<List<POI>>> getSavedPois(@Header("Authorization") String authHeader);
+
+    @FormUrlEncoded
+    @POST("/users")
+    Call<Response<SuccessResponse>> register(@Field("username") String username,
+                                             @Field("password") String password,
+                                             @Field("firstname") String firstName,
+                                             @Field("lastName") String lastName,
+                                             @Field("email") String email);
 }

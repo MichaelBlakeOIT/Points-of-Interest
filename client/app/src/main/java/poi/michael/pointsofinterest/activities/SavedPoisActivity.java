@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -37,13 +38,21 @@ import java.util.List;
 import java.util.Map;
 
 import poi.michael.pointsofinterest.R;
+import poi.michael.pointsofinterest.adapters.MapRecyclerAdapter;
+import poi.michael.pointsofinterest.interfaces.APIInterface;
+import poi.michael.pointsofinterest.models.POI;
+import poi.michael.pointsofinterest.utils.APIRequests;
 import poi.michael.pointsofinterest.utils.volleySingleton;
+import retrofit2.Call;
+import retrofit2.Callback;
 
 public class SavedPoisActivity extends Activity {
     private RecyclerView mRecyclerView;
 
     private LinearLayoutManager mLinearLayoutManager;
     private GridLayoutManager mGridLayoutManager;
+    private APIInterface mAPIInterface;
+    private String mToken;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,11 +61,16 @@ public class SavedPoisActivity extends Activity {
 
         mGridLayoutManager = new GridLayoutManager(this, 2);
         mLinearLayoutManager = new LinearLayoutManager(this);
+        mAPIInterface = new APIRequests(getApplicationContext()).getInterface();
 
-        new GetSavedPOIsTask().execute();
+        SharedPreferences sharedPref = getSharedPreferences(getString(R.string.user_token), Context.MODE_PRIVATE);
+        mToken = "Bearer " + sharedPref.getString("token", "");
+
+        loadSavedPOIs();
+        //new GetSavedPOIsTask().execute();
     }
 
-    private RecyclerView.RecyclerListener mRecycleListener = new RecyclerView.RecyclerListener() {
+    /*private RecyclerView.RecyclerListener mRecycleListener = new RecyclerView.RecyclerListener() {
 
         @Override
         public void onViewRecycled(RecyclerView.ViewHolder holder) {
@@ -69,13 +83,33 @@ public class SavedPoisActivity extends Activity {
                 mapHolder.map.setMapType(GoogleMap.MAP_TYPE_NONE);
             }
         }
-    };
+    };*/
 
-    private class MapAdapter extends RecyclerView.Adapter<MapAdapter.ViewHolder> {
+    private void loadSavedPOIs() {
+        mAPIInterface.getSavedPois(mToken).enqueue(new Callback<poi.michael.pointsofinterest.models.Response<List<POI>>>() {
+            @Override
+            public void onResponse(@NonNull Call<poi.michael.pointsofinterest.models.Response<List<POI>>> call, @NonNull retrofit2.Response<poi.michael.pointsofinterest.models.Response<List<POI>>> response) {
+                mRecyclerView = findViewById(R.id.recycler_view);
+                mRecyclerView.setHasFixedSize(true);
+                mRecyclerView.setLayoutManager(mLinearLayoutManager);
+                mRecyclerView.setAdapter(new MapRecyclerAdapter(response.body().getData(), getApplicationContext()));
+                //mRecyclerView.setAdapter(new MapAdapter(response.body().getData()));
+               // mRecyclerView.setRecyclerListener(mRecycleListener);
+            }
 
-        private List<NamedLocation> namedLocations;
+            @Override
+            public void onFailure(@NonNull Call<poi.michael.pointsofinterest.models.Response<List<POI>>> call, @NonNull Throwable t) {
 
-        private MapAdapter(List<NamedLocation> locations) {
+            }
+        });
+    }
+
+    /*private class MapAdapter extends RecyclerView.Adapter<MapAdapter.ViewHolder> {
+
+        private List<POI> pois;
+        //private List<NamedLocation> namedLocations;
+
+        private MapAdapter(List<POI> locations) {
             super();
             namedLocations = locations;
         }
@@ -86,10 +120,6 @@ public class SavedPoisActivity extends Activity {
                     .inflate(R.layout.poi_list_fragment, parent, false));
         }
 
-        /**
-         * This function is called when the user scrolls through the screen and a new item needs
-         * to be shown. So we will need to bind the holder with the details of the next item.
-         */
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
             if (holder == null) {
@@ -113,8 +143,8 @@ public class SavedPoisActivity extends Activity {
             private ViewHolder(View itemView) {
                 super(itemView);
                 layout = itemView;
-                mapView = (MapView) layout.findViewById(R.id.lite_listrow_map);
-                title = (TextView) layout.findViewById(R.id.saved_poi_title);
+                mapView = layout.findViewById(R.id.lite_listrow_map);
+                title = layout.findViewById(R.id.saved_poi_title);
                 if (mapView != null) {
                     // Initialise the MapView
                     mapView.onCreate(null);
@@ -157,20 +187,9 @@ public class SavedPoisActivity extends Activity {
                 title.setText(item.name);
             }
         }
-    }
+    }*/
 
-    private static class NamedLocation {
-
-        public final String name;
-        public final LatLng location;
-
-        NamedLocation(String name, LatLng location) {
-            this.name = name;
-            this.location = location;
-        }
-    }
-
-    private List<NamedLocation> list_locations = new ArrayList<>();
+    /*private List<NamedLocation> list_locations = new ArrayList<>();
 
     private class GetSavedPOIsTask extends AsyncTask<Void, Void, Boolean> {
         private Context mContext;
@@ -234,5 +253,5 @@ public class SavedPoisActivity extends Activity {
             volleySingleton.getInstance(mContext).getRequestQueue().add(saveRequest);
             return true;
         }
-    }
+    }*/
 }
