@@ -129,7 +129,7 @@ public class ProfileActivity extends Activity {
             @Override
             public void onResponse(Call<poi.michael.pointsofinterest.models.Response<SuccessResponse>> call, retrofit2.Response<poi.michael.pointsofinterest.models.Response<SuccessResponse>> response) {
                 if (response.isSuccessful() && response.body().isSuccess()) {
-                    mFollowButton.setText("Unfollow User");
+                    mFollowButton.setText(getResources().getString(R.string.unfollow));
                     mFollowing = 1;
                 }
             }
@@ -145,7 +145,7 @@ public class ProfileActivity extends Activity {
         mAPIInterface.unfollowUser(mProfileUsername, mToken).enqueue(new Callback<poi.michael.pointsofinterest.models.Response<SuccessResponse>>() {
             @Override
             public void onResponse(Call<poi.michael.pointsofinterest.models.Response<SuccessResponse>> call, retrofit2.Response<poi.michael.pointsofinterest.models.Response<SuccessResponse>> response) {
-                mFollowButton.setText("Follow User");
+                mFollowButton.setText(getResources().getString(R.string.follow));
                 mFollowing = 0;
             }
 
@@ -214,9 +214,9 @@ public class ProfileActivity extends Activity {
             private ViewHolder(View itemView) {
                 super(itemView);
                 layout = itemView;
-                mapView = (MapView) layout.findViewById(R.id.lite_listrow_map);
-                title = (TextView) layout.findViewById(R.id.saved_poi_title);
-                comments = (Button) layout.findViewById(R.id.comments_button);
+                mapView = layout.findViewById(R.id.lite_listrow_map);
+                title = layout.findViewById(R.id.saved_poi_title);
+                comments = layout.findViewById(R.id.comments_button);
                 if (mapView != null) {
                     // Initialise the MapView
                     mapView.onCreate(null);
