@@ -11,19 +11,10 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapView;
-import com.google.android.gms.maps.MapsInitializer;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -111,8 +102,6 @@ public class ProfileActivity extends Activity {
                     mRecyclerView.setHasFixedSize(true);
                     mRecyclerView.setLayoutManager(mLinearLayoutManager);
                     mRecyclerView.setAdapter(new MapRecyclerAdapter(list_locations, getApplicationContext()));
-                    //mRecyclerView.setAdapter(new MapAdapter(list_locations));
-                    //mRecyclerView.setRecyclerListener(mRecycleListener);
                 }
                 else {
                     //something
@@ -157,22 +146,6 @@ public class ProfileActivity extends Activity {
             }
         });
     }
-
-    /*private RecyclerView.RecyclerListener mRecycleListener = new RecyclerView.RecyclerListener() {
-
-        @Override
-        public void onViewRecycled(RecyclerView.ViewHolder holder) {
-            MapRecyclerAdapter.ViewHolder mapHolder = (MapRecyclerAdapter.ViewHolder) holder;
-            if (mapHolder != null && mapHolder.map != null) {
-                // Clear the map and free up resources by changing the map type to none.
-                // Also reset the map when it gets reattached to layout, so the previous map would
-                // not be displayed.
-                mapHolder.map.clear();
-                mapHolder.map.setMapType(GoogleMap.MAP_TYPE_NONE);
-            }
-        }
-    };*/
-
 
     private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
         ImageView bmImage;
