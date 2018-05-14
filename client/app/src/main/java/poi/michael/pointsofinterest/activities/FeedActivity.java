@@ -32,7 +32,7 @@ public class FeedActivity extends Activity {
         SharedPreferences sharedPref = getSharedPreferences(getString(R.string.user_token), Context.MODE_PRIVATE);
         mToken = "Bearer " + sharedPref.getString("token", "");
 
-        mAPIInterface = new APIRequests(getApplicationContext()).getInterface();
+        mAPIInterface = new APIRequests().getInterface();
         mLinearLayoutManager = new LinearLayoutManager(this);
 
         loadFollowingPOIs();

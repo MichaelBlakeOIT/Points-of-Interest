@@ -68,7 +68,7 @@ public class ProfileActivity extends Activity {
             mFollowButton.setVisibility(View.GONE);
         }
 
-        mAPIInterface = new APIRequests(getApplicationContext()).getInterface();
+        mAPIInterface = new APIRequests().getInterface();
 
         loadProfileDetails();
     }

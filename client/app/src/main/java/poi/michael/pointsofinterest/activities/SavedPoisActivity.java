@@ -33,7 +33,7 @@ public class SavedPoisActivity extends Activity {
 
         mGridLayoutManager = new GridLayoutManager(this, 2);
         mLinearLayoutManager = new LinearLayoutManager(this);
-        mAPIInterface = new APIRequests(getApplicationContext()).getInterface();
+        mAPIInterface = new APIRequests().getInterface();
 
         SharedPreferences sharedPref = getSharedPreferences(getString(R.string.user_token), Context.MODE_PRIVATE);
         mToken = "Bearer " + sharedPref.getString("token", "");

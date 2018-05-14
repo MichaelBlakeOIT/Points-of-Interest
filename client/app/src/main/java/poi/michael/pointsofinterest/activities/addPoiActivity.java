@@ -39,7 +39,7 @@ public class addPoiActivity extends Activity {
         Intent intentExtras = getIntent();
         mLatitude = intentExtras.getDoubleExtra("latitude", 0);
         mLongitude = intentExtras.getDoubleExtra("longitude", 0);
-        mAPIInterface = new APIRequests(getApplicationContext()).getInterface();
+        mAPIInterface = new APIRequests().getInterface();
 
         SharedPreferences sharedPref = getSharedPreferences(getString(R.string.user_token), Context.MODE_PRIVATE);
         mToken = "Bearer " + sharedPref.getString("token", "");

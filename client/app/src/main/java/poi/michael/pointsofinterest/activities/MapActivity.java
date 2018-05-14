@@ -2,13 +2,14 @@ package poi.michael.pointsofinterest.activities;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -22,7 +23,6 @@ import android.view.View;
 import android.widget.CheckBox;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -31,19 +31,21 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import poi.michael.pointsofinterest.R;
+import poi.michael.pointsofinterest.interfaces.APIInterface;
 import poi.michael.pointsofinterest.models.POI;
+import poi.michael.pointsofinterest.models.Response;
 import poi.michael.pointsofinterest.utils.APIRequests;
 import poi.michael.pointsofinterest.utils.MapTools;
+import retrofit2.Call;
+import retrofit2.Callback;
 
 public class MapActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
     private LocationManager mLocationManager;
-    private FusedLocationProviderClient mFusedLocationProviderClient;
     private Toolbar mToolbar;
     private CheckBox mCheckbox;
     private View mFloatingButton;
@@ -52,6 +54,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private View.OnClickListener mSnackbarClickListener;
     private View.OnClickListener mSnackbarNoLocationListener;
     private MapTools.LocationHelper mLocationHelper;
+    private APIInterface mAPIInterface;
+    private String mToken;
     private static final String TAG = MapActivity.class.getName();
 
     @Override
@@ -59,8 +63,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
 
-        mToolbar = (Toolbar) findViewById(R.id.my_toolbar);
-        mCheckbox = (CheckBox) findViewById(R.id.checkBox);
+        mToolbar = findViewById(R.id.my_toolbar);
+        mCheckbox = findViewById(R.id.checkBox);
         mFloatingButton = findViewById(R.id.new_poi);
 
         setSupportActionBar(mToolbar);
@@ -69,7 +73,10 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+        mAPIInterface = new APIRequests().getInterface();
+
+        SharedPreferences sharedPref = getSharedPreferences(getString(R.string.user_token), Context.MODE_PRIVATE);
+        mToken = "Bearer " + sharedPref.getString("token", "");
 
         mFloatingButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -87,10 +94,10 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             public void onClick(View view) {
                 if (mCheckbox.isChecked() && mMap != null) {
                     mMap.clear();
-                    new loadPoints(true).execute();
+                    loadAllPoints();
                 } else if (mMap != null) {
                     mMap.clear();
-                    new loadPoints(false).execute();
+                    //new loadPoints(false).execute();
                 }
             }
         });
@@ -98,7 +105,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         mSnackbarClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new loadPoints(false).execute();
+                loadAllPoints();
             }
         };
 
@@ -109,7 +116,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             }
         };
 
-        new loadPoints(false).execute();
+        loadAllPoints();
     }
 
     @Override
@@ -152,7 +159,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 double latitude = data.getDoubleExtra("latitude", 0);
                 double longitude = data.getDoubleExtra("longitude", 0);
                 String name = data.getStringExtra("name");
-                String description = data.getStringExtra("description");
+                //String description = data.getStringExtra("description");
                 // do something with the result
                 mMap.addMarker(new MarkerOptions().position(new LatLng(latitude, longitude)).title(name));
             } else if (resultCode == Activity.RESULT_CANCELED) {
@@ -212,6 +219,53 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         mMap.setMyLocationEnabled(true);
     }
 
+    void loadAllPoints() {
+        mAPIInterface.getAllPois(mToken).enqueue(new Callback<Response<List<POI>>>() {
+            @Override
+            public void onResponse(@NonNull Call<Response<List<POI>>> call, @NonNull retrofit2.Response<Response<List<POI>>> response) {
+                if (response.isSuccessful() && response.body().isSuccess()) {
+                    Marker marker;
+
+                    for (POI poi : response.body().getData()) {
+                        marker = mMap.addMarker(new MarkerOptions().position(poi.getLocation()).title(poi.getName()));
+
+                        marker.setTag(poi);
+                    }
+
+                    mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+                        @Override
+                        public boolean onMarkerClick(Marker marker) {
+                            POI info = (POI) marker.getTag();
+                            Intent POIActivityIntent = new Intent(MapActivity.this, POIActivity.class);
+
+                            POIActivityIntent.putExtra("title", info.getName());
+                            POIActivityIntent.putExtra("description", info.getDescription());
+                            POIActivityIntent.putExtra("username", info.getUsername());
+                            POIActivityIntent.putExtra("id", info.getPoiId());
+                            POIActivityIntent.putExtra("rating", info.getRating());
+                            POIActivityIntent.putExtra("Location", info.getLocation());
+
+                            MapActivity.this.startActivity(POIActivityIntent);
+                            return false;
+                        }
+                    });
+                }
+                else {
+                    Snackbar.make(findViewById(android.R.id.content), "Error loading points", Snackbar.LENGTH_INDEFINITE)
+                            .setAction("Retry", mSnackbarClickListener)
+                            .show();
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<Response<List<POI>>> call, @NonNull Throwable t) {
+                Snackbar.make(findViewById(android.R.id.content), "Error loading points", Snackbar.LENGTH_INDEFINITE)
+                        .setAction("Retry", mSnackbarClickListener)
+                        .show();
+            }
+        });
+    }
+
     private Location getLastKnownLocation() {
         mLocationManager = (LocationManager) getApplicationContext().getSystemService(LOCATION_SERVICE);
         List<String> providers = mLocationManager.getProviders(true);
@@ -230,64 +284,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             }
         }
         return bestLocation;
-    }
-
-    private class loadPoints extends AsyncTask<Void, Void, ArrayList<POI>> {
-        private boolean mOnlyFollowed;
-        loadPoints(boolean onlyFollowed) {
-            mOnlyFollowed = onlyFollowed;
-        }
-
-        @Override
-        protected ArrayList<POI> doInBackground(Void... params) {
-            ArrayList<POI> POIs;
-
-            if (mOnlyFollowed)
-                POIs = new APIRequests(getApplicationContext()).getPOIs(APIRequests.PoiChoices.FOLLOWING);
-            else
-                POIs = new APIRequests(getApplicationContext()).getPOIs(APIRequests.PoiChoices.ALL);
-
-            return POIs;
-        }
-
-        @Override
-        protected void onPostExecute(final ArrayList<POI> points) {
-
-            //on successful retrieval of POIs
-            if (points != null) {
-                Marker marker;
-
-                for(POI poi: points) {
-                    marker = mMap.addMarker(new MarkerOptions().position(poi.getLocation()).title(poi.getName()));
-
-                    marker.setTag(poi);
-                }
-
-                mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-                    @Override
-                    public boolean onMarkerClick(Marker marker) {
-                        POI info = (POI) marker.getTag();
-                        Intent POIActivityIntent = new Intent(MapActivity.this, POIActivity.class);
-
-                        POIActivityIntent.putExtra("title", info.getName());
-                        POIActivityIntent.putExtra("description", info.getDescription());
-                        POIActivityIntent.putExtra("username", info.getUsername());
-                        POIActivityIntent.putExtra("id", info.getPoiId());
-                        POIActivityIntent.putExtra("rating", info.getRating());
-                        POIActivityIntent.putExtra("Location", info.getLocation());
-
-                        MapActivity.this.startActivity(POIActivityIntent);
-                        return false;
-                    }
-                });
-            }
-            //error retrieving points
-            else {
-                Snackbar.make(findViewById(android.R.id.content), "Error loading points", Snackbar.LENGTH_INDEFINITE)
-                        .setAction("Retry", mSnackbarClickListener)
-                        .show();
-            }
-        }
     }
 
     private void logout() {

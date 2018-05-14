@@ -38,7 +38,7 @@ public class SignupActivity extends Activity {
         mFirstNameView = findViewById(R.id.FirstNameSignupField);
         mLastNameView = findViewById(R.id.LastNameSignupField);
         mEmailView = findViewById(R.id.EmailSignupField);
-        mAPIInterface = new APIRequests(getApplicationContext()).getInterface();
+        mAPIInterface = new APIRequests().getInterface();
         mProgressDialog = new ProgressDialog(SignupActivity.this);
 
         Button mSignupButton = findViewById(R.id.sign_up_button);

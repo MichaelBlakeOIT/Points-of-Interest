@@ -32,6 +32,7 @@ public class CommentActivity extends Activity {
     private int mPoiId;
     private EditText mComment;
     private CommentAdapter mCommentAdapter;
+    private APIInterface mAPIInterface;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +42,7 @@ public class CommentActivity extends Activity {
         Intent intentExtras = getIntent();
         mPoiId = intentExtras.getIntExtra("poi_id", 0);
         mComment = findViewById(R.id.comment_box);
+        mAPIInterface = new APIRequests().getInterface();
 
         mLinearLayoutManager = new LinearLayoutManager(this);
 
@@ -51,8 +53,7 @@ public class CommentActivity extends Activity {
         SharedPreferences sharedPref = getSharedPreferences(getString(R.string.user_token), Context.MODE_PRIVATE);
         String token = "Bearer " + sharedPref.getString("token", "");
 
-        APIInterface APIInterface = new APIRequests(getApplicationContext()).getInterface();
-        APIInterface.getCommentList(mPoiId, token).enqueue(new Callback<Response<List<Comment>>>() {
+        mAPIInterface.getCommentList(mPoiId, token).enqueue(new Callback<Response<List<Comment>>>() {
             @Override
             public void onResponse(Call<Response<List<Comment>>> call, retrofit2.Response<Response<List<Comment>>> response) {
                 if (response.isSuccessful()) {
@@ -79,8 +80,7 @@ public class CommentActivity extends Activity {
         SharedPreferences sharedPref = getSharedPreferences(getString(R.string.user_token), Context.MODE_PRIVATE);
         String token = "Bearer " + sharedPref.getString("token", "");
 
-        APIInterface APIInterface = new APIRequests(getApplicationContext()).getInterface();
-        APIInterface.createComment(mPoiId, comment, token).enqueue(new Callback<Response<Comment>>() {
+        mAPIInterface.createComment(mPoiId, comment, token).enqueue(new Callback<Response<Comment>>() {
             @Override
             public void onResponse(Call<Response<Comment>> call, retrofit2.Response<Response<Comment>> response) {
                 if (response.isSuccessful()) {

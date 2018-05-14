@@ -43,7 +43,7 @@ public class LoginActivity extends Activity {
         mSignInButton.setOnClickListener(mSignInButtonListener);
         mRegisterTextView.setOnClickListener(mRegisterSelectListener);
 
-        mAPIInterface = new APIRequests(getApplicationContext()).getInterface();
+        mAPIInterface = new APIRequests().getInterface();
         mProgDialog = new ProgressDialog(LoginActivity.this);
 
         mSharedPreferences = getSharedPreferences(getString(R.string.user_token), Context.MODE_PRIVATE);

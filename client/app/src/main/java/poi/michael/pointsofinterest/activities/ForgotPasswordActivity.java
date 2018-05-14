@@ -27,7 +27,7 @@ public class ForgotPasswordActivity extends Activity {
 
         mUsernameText = findViewById(R.id.resetpasswordusernamefield);
 
-        mAPIInterface = new APIRequests(getApplicationContext()).getInterface();
+        mAPIInterface = new APIRequests().getInterface();
     }
 
     private void sendEmail() {
